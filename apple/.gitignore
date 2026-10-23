@@ -1,0 +1,9 @@
+bridge/target/
+bridge/target-sim-probe.log
+build/
+*.xcodeproj
+*.xcresult
+VectorCraftKit/VectorCraftBridge.xcframework/
+VectorCraftKit/Sources/VectorCraftKit/vectorcraft_apple.swift
+VectorCraftKit/.build/
+.DS_Store
