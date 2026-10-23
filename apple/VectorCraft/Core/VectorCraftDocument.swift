@@ -12,29 +12,42 @@ final class VectorCraftDocument: ReferenceFileDocument {
     }
     static var writableContentTypes: [UTType] { [.vectorcraftDocument] }
 
-    /// The editor state (main-actor); the document system creates and saves documents on the main thread.
-    let model: DocumentModel
     /// The engine document, for `snapshot` (thread-safe, so no hop to the main actor is needed).
     private let handle: DocumentHandle
+    /// Whether this document was made by File > New (the demo seeds it).
+    private let isNew: Bool
+    /// An engine error met while making the document, shown once the model exists.
+    private let initError: String?
+    /// Made on first use on the main actor: `DocumentGroup` creates and reads documents on background
+    /// threads (a new document is written, then read back through `init(configuration:)`), where the
+    /// main-actor model must not be built.
+    @MainActor private var madeModel: DocumentModel?
+
+    /// The editor state (main-actor), built on first access from the scene's view.
+    @MainActor var model: DocumentModel {
+        if let madeModel { return madeModel }
+        let m = DocumentModel(handle: handle)
+        m.lastError = initError
+        // A new document, or the empty file DocumentGroup reads back after creating one, gets the demo art.
+        m.isNewDocument = isNew || m.isEmptyDocument
+        if AppSettings.isDemo && m.isNewDocument { m.seedDemo() }
+        madeModel = m
+        return m
+    }
 
     /// File > New.
     init() {
         AppEnvironment.bootstrap()
-        let made: DocumentModel
-        do {
-            let handle = try DocumentHandle.newDocument(width: 1080, height: 1080, preset: "")
-            made = MainActor.assumeIsolated { DocumentModel(handle: handle) }
-        } catch {
-            // The engine could not make a document: the error is shown by the placeholder model.
-            let message = error.localizedDescription
-            made = MainActor.assumeIsolated { DocumentModel.failed(message) }
+        var error: String?
+        var made = try? DocumentHandle.newDocument(width: 1080, height: 1080, preset: "")
+        if made == nil {
+            error = "VectorCraft could not create a document."
+            made = Self.fallbackHandle()
         }
-        model = made
-        handle = made.handle
-        MainActor.assumeIsolated {
-            made.isNewDocument = true
-            if AppSettings.isDemo { made.seedDemo() }
-        }
+        // `fallbackHandle` only fails when the engine library itself is broken.
+        handle = made ?? Self.lastResortHandle()
+        isNew = true
+        initError = error
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -55,9 +68,9 @@ final class VectorCraftDocument: ReferenceFileDocument {
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent(name)
         try data.write(to: url, options: .atomic)
-        let opened = try DocumentHandle.open(path: url.path)
-        model = MainActor.assumeIsolated { DocumentModel(handle: opened) }
-        handle = opened
+        handle = try DocumentHandle.open(path: url.path)
+        isNew = false
+        initError = nil
     }
 
     func snapshot(contentType: UTType) throws -> Data {
@@ -69,23 +82,27 @@ final class VectorCraftDocument: ReferenceFileDocument {
     }
 }
 
-extension DocumentModel {
-    /// A model for the (practically impossible) case that the engine could not create a document. Tries other
-    /// sizes and a blank SVG import so the person sees the error in an alert instead of a crash.
-    static func failed(_ message: String) -> DocumentModel {
-        var handle = try? DocumentHandle.newDocument(width: 595, height: 842, preset: "")
-        if handle == nil {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("blank-\(UUID().uuidString).svg")
-            let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"600\"></svg>"
-            if (try? svg.write(to: url, atomically: true, encoding: .utf8)) != nil {
-                handle = try? DocumentHandle.open(path: url.path)
-            }
-        }
-        // `DocumentGroup` needs a non-optional document and the model a handle: with no engine document at all
-        // there is nothing to show. Unreachable unless the engine library itself is broken.
-        guard let handle else { preconditionFailure("VectorCraft engine could not create a document: \(message)") }
-        let model = DocumentModel(handle: handle)
-        model.lastError = message
-        return model
+extension VectorCraftDocument {
+    /// Another document size, then a blank SVG import, for the (practically impossible) case that File > New fails.
+    static func fallbackHandle() -> DocumentHandle? {
+        if let h = try? DocumentHandle.newDocument(width: 595, height: 842, preset: "") { return h }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("blank-\(UUID().uuidString).svg")
+        let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"800\" height=\"600\"></svg>"
+        guard (try? svg.write(to: url, atomically: true, encoding: .utf8)) != nil else { return nil }
+        return try? DocumentHandle.open(path: url.path)
     }
+
+    /// Keeps trying: `DocumentGroup` needs a document, and every engine call is panic-safe, so this only spins
+    /// if the engine library cannot make any document at all.
+    static func lastResortHandle() -> DocumentHandle {
+        while true {
+            if let h = fallbackHandle() { return h }
+            Thread.sleep(forTimeInterval: 1)
+        }
+    }
+}
+
+extension DocumentModel {
+    /// No art yet: only layers in the layer list.
+    var isEmptyDocument: Bool { layers.allSatisfy { $0.depth == 0 } }
 }
