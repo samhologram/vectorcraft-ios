@@ -149,10 +149,11 @@ final class CanvasUIView: UIView, UIGestureRecognizerDelegate, UIPencilInteracti
     }
 
     /// Weakly targeted so the run loop never keeps the view alive.
-    private final class LinkProxy: NSObject {
+    /// Main-actor isolated: the display link is added to the main run loop, so `tick` runs on the main thread.
+    @MainActor private final class LinkProxy: NSObject {
         weak var view: CanvasUIView?
         @objc func tick(_ link: CADisplayLink) {
-            MainActor.assumeIsolated { view?.displayTick(link) }
+            view?.displayTick(link)
         }
     }
 
