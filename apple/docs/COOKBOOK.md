@@ -2,21 +2,28 @@
 
 For LLM agents. Replace `<App>`/`<app>` with the target (VectorCraft/vectorcraft, LightCraft/lightcraft, …). Execute in
 order; each phase ends green before the next. Revision 2: adds what the LightCraft port taught (data model by category,
-contract-first parallel agents, hollow-green traps, iPad-then-iPhone testing).
+contract-first parallel agents, hollow-green traps, iPad-then-iPhone testing). Revision 3: opus/sonnet/haiku roles,
+parallel apps, `main` + `[skip ci]` pushes, upstream sync script, live simulator testing and the haiku feature pass.
 
 ## 0. Rules
 - Fork code only in `apple/` (+ CI workflow, `FORK.md`). Never edit upstream files. Upstream stays mergeable (remote
-  `upstream`, merge, never rebase).
+  `upstream`, merge, never rebase). Fork is `<app>-ios` on the user's GitHub; its `main` is our main branch.
+  `FORK.md` documents the remotes, the "only `apple/` is ours" rule and the sync command
+  (`apple/scripts/sync-upstream.sh`); copy this cookbook to `apple/docs/COOKBOOK.md`.
 - Rust engine untouched; Swift only in `apple/`. No Tauri/webview. If the engine lacks something, work around it in the
   bridge or Swift and note it for upstream.
 - Every UI action = an engine command by id. Menus, palette and parameter forms are generated from the engine catalog;
   hand-write only when the generic one is not good enough.
-- Don't commit until it builds and runs on a simulator. After that, commit only when asked; when asked, push with the
-  requested CI marker (e.g. `[skip ci]`) and use the git protocol the user's GitHub auth is set up for.
+- Don't commit until it builds and runs on a simulator, unless the user asks earlier. After that, commit only when
+  asked; when asked, commit to `main`, push to `origin` with `[skip ci]` in every message (no CI/CD runs; any workflow
+  is `workflow_dispatch` only), using the git protocol the user's GitHub auth is set up for. Never commit build output
+  (`apple/.gitignore`: `target/`, derived data, `.xcresult`, xcframeworks, generated `.xcodeproj`).
 - Work unattended: if a tool needs a permission click (e.g. a simulator panel), switch to a route that doesn't
   (`simctl`, XCUITest) instead of waiting.
-- Subagents: haiku for review/search swarms and simulator driving; sonnet for code. Give each a self-contained brief,
-  the files it owns, the files it must not touch, its own `-derivedDataPath` and its own simulators.
+- Models: opus orchestrates each app (one session per app; several apps run in parallel); sonnet for all code; haiku
+  for review/search swarms, simulator driving and feature test passes. Give each subagent a self-contained brief,
+  the files it owns, the files it must not touch, its own `-derivedDataPath` and its own simulators (named with the
+  app prefix, e.g. `<App>-iPad`). Parallel apps share the disk: budget ~10 GB each and check `df` before heavy builds.
 
 ## 0b. Product shape (decide before writing UI; ask the user when the category leaves it open)
 - **Data model follows the category, not the template.** A document app (image, vector, layout, PDF) uses
@@ -78,6 +85,7 @@ contract-first parallel agents, hollow-green traps, iPad-then-iPhone testing).
 - `check-command-ids.sh` (also flags literal ids in Swift missing from `ui-commands.txt`; widget ids must not look
   like command ids), `tool-coverage.sh` (every desktop tool/panel mapped in `docs/tool-map.toml`),
   `feature-coverage.sh --check` (generated `docs/FEATURE_COVERAGE.md`).
+- `sync-upstream.sh`: fetch `upstream`, `git merge upstream/main` (never rebase), then run the bridge gate.
 - Run all of them plus the bridge gate before every commit.
 
 ## 4. App (`apple/<App>`, XcodeGen `project.yml`, iOS 26+, Swift 6)
@@ -150,8 +158,11 @@ contract-first parallel agents, hollow-green traps, iPad-then-iPhone testing).
   `xcresulttool export attachments` (`manifest.json` maps names to files). Downscale screenshots before reading them.
 - "Unable to Import Document (DocumentManager error 1)" = stale simulator state: `simctl erase` and rerun (re-seed).
 - Close Simulator.app while tests run; drive and inspect with XCUITest and `simctl io screenshot`, not by hand.
-- After the scripted suites, a haiku feature pass: one agent per feature area drives the simulator (iPad, then iPhone)
-  through XCUITest and screenshots, and reports defects with evidence; sonnet fixes; rerun the affected suites.
+- Test live: attach the built-in iOS Simulator panel early so the user can watch. When the user asks for no
+  screenshots, verify through the accessibility tree, XCUITest assertions, notes and logs instead.
+- Once stable, a haiku feature pass over all features: one agent per feature area (every tool, panel, command and
+  document/library flow) drives the built-in simulator (iPad, then iPhone) and reports defects with evidence; sonnet
+  fixes; rerun until clean. The final report has a per-feature pass/fail table.
 
 ## 8. Device
 - Build the full xcframework (release, no `--sim-only`), set `DEVELOPMENT_TEAM`. With a free team, drop the iCloud
