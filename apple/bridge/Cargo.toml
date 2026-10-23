@@ -1,0 +1,59 @@
+[package]
+name = "vectorcraft-apple"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+# Fork-only crate: its own workspace so the upstream workspace manifest stays untouched.
+[workspace]
+
+[lib]
+crate-type = ["staticlib", "lib"]
+name = "vectorcraft_apple"
+
+[dependencies]
+# The engine without the desktop UI. `bundled-fonts` (default here) keeps the OFL fallback fonts the
+# engine ships, so text renders even before the system font scan finds anything.
+vectorcraft-engine = { path = "../../crates/engine", default-features = false }
+vectorcraft-tools = { path = "../../crates/tools" }
+vectorcraft-doc = { path = "../../crates/doc" }
+vectorcraft-render = { path = "../../crates/render" }
+vectorcraft-format = { path = "../../crates/format" }
+vectorcraft-text = { path = "../../crates/text", default-features = false }
+vectorcraft-geom = { path = "../../crates/geom" }
+vectorcraft-effects = { path = "../../crates/effects" }
+vectorcraft-color = { path = "../../crates/color" }
+kurbo = { version = "0.13", features = ["serde"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+uniffi = "0.32"
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"
+
+[features]
+default = ["bundled-fonts"]
+bundled-fonts = ["vectorcraft-engine/bundled-fonts"]
+# Only needed to run the `uniffi-bindgen` binary (Swift binding generation); never shipped in the app.
+cli = ["uniffi/cli"]
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+required-features = ["cli"]
+
+# The upstream workspace patches these (git revisions of craft-libs); a path dependency does not
+# inherit the patch, so it is repeated here. Keep in step with ../../Cargo.toml `[patch.crates-io]`.
+[patch.crates-io]
+hayro-syntax = { git = "https://github.com/storytold/craft-libs", rev = "ca50d63b773c99f96e75c77ce5a1d21e7c9cda0d" }
+hayro-interpret = { git = "https://github.com/storytold/craft-libs", rev = "ca50d63b773c99f96e75c77ce5a1d21e7c9cda0d" }
+hayro-jbig2 = { git = "https://github.com/storytold/craft-libs", rev = "ca50d63b773c99f96e75c77ce5a1d21e7c9cda0d" }
+krilla = { git = "https://github.com/storytold/craft-libs", rev = "ca50d63b773c99f96e75c77ce5a1d21e7c9cda0d" }
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

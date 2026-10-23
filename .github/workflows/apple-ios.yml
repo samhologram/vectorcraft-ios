@@ -1,0 +1,48 @@
+name: Apple iOS
+
+# Manual only: nothing here runs on push or pull request (see FORK.md).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: apple-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal -c clippy
+          rustup default stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apple/bridge/target
+          key: apple-bridge-${{ hashFiles('apple/bridge/Cargo.lock') }}
+      - name: Bridge gate
+        working-directory: apple/bridge
+        run: |
+          cargo test
+          cargo clippy --all-targets -- -D warnings
+      - name: Scripts
+        run: |
+          apple/scripts/check-command-ids.sh
+          apple/scripts/tool-coverage.sh >/dev/null
+          apple/scripts/feature-coverage.sh --check
+      - name: Build the xcframework
+        run: apple/scripts/build-xcframework.sh --sim-only --debug
+      - name: Generate the project
+        run: |
+          brew install xcodegen
+          cd apple && xcodegen generate
+      - name: Build for testing
+        run: |
+          cd apple
+          xcodebuild build-for-testing -scheme VectorCraft -destination 'generic/platform=iOS Simulator' \
+            ARCHS=arm64 CODE_SIGNING_ALLOWED=NO -derivedDataPath build/dd

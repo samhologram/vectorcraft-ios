@@ -59,3 +59,9 @@ Gates before every commit: `cd apple/bridge && cargo test && cargo clippy --all-
 
 Demo: launch with `-VectorCraftDemo` — a new document is seeded through engine commands (shapes, a star, a gradient,
 type) so screenshots and UI tests start from real art.
+
+## App icon
+
+`VectorCraft/Resources/Assets.xcassets/AppIcon.appiconset` and `LaunchIcon.imageset` are upstream
+`assets/app-icon/vectorcraft.svg` rendered full-bleed (rounded clip removed), opaque, 1024 px (licence:
+`docs/APP-ICON-LICENSE.txt`, copied from `assets/app-icon/LICENSE.txt`).

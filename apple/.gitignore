@@ -7,3 +7,4 @@ VectorCraftKit/VectorCraftBridge.xcframework/
 VectorCraftKit/Sources/VectorCraftKit/vectorcraft_apple.swift
 VectorCraftKit/.build/
 .DS_Store
+bridge/*.log
