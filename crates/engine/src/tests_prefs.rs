@@ -463,11 +463,11 @@ fn use_precise_cursors_swaps_the_tools_own_pointers_for_a_crosshair() {
     }
 }
 
-/// With Alt held, the Pencil and the Paintbrush show their closing cursors, and Use Precise Cursors turns those into
-/// a crosshair too.
+/// With Alt held while drawing, the Pencil and the Paintbrush show their closing cursors, and Use Precise Cursors
+/// turns those into a crosshair too.
 #[test]
 fn alt_shows_the_pencil_and_paintbrush_closing_cursors() {
-    use vectorcraft_tools::{Cursor, Mods};
+    use vectorcraft_tools::{Cursor, Mods, PointerEvent, PointerKind};
     let mut s = Session::new();
     s.execute("file.new", &json!({"width": 400, "height": 400})).unwrap();
     let at = vectorcraft_geom::Point::new(300.0, 300.0);
@@ -476,7 +476,10 @@ fn alt_shows_the_pencil_and_paintbrush_closing_cursors() {
         s.execute("prefs.set", &json!({"key": "usePreciseCursors", "value": precise})).unwrap();
         for (tool, c) in [("pencil", Cursor::PencilClose), ("paintbrush", Cursor::PaintbrushClose)] {
             s.select_tool(tool, ViewInfo::default()).unwrap();
+            s.pointer(&PointerEvent::new(PointerKind::Down, 250.0, 250.0), ViewInfo::default()).unwrap();
+            s.pointer(&PointerEvent::new(PointerKind::Drag, 300.0, 300.0), ViewInfo::default()).unwrap();
             assert_eq!(s.cursor(at, alt, ViewInfo::default()), if precise { Cursor::Crosshair } else { c }, "{tool}, precise {precise}");
+            s.pointer(&PointerEvent::new(PointerKind::Up, 300.0, 300.0), ViewInfo::default()).unwrap();
         }
     }
 }
@@ -614,6 +617,30 @@ fn spacing_guides_space_a_dragged_square_like_its_row() {
     assert!(marks >= 2, "both gaps marked");
     set_pref(&mut s, "spacingGuides", json!(false));
     assert_eq!(drag(&mut s), (161.0, 0), "off: where it was dragged");
+}
+
+/// Smart Guides › Invoke Distance Guides: with a square selected, Alt held over another square to
+/// its right shows the gap between them in the document's General unit; with the preference or
+/// View › Smart Guides off, nothing.
+#[test]
+fn invoke_distance_guides_measures_the_selection_to_the_object_under_alt() {
+    use vectorcraft_tools::{Mods, Overlay, PointerKind::Move};
+    let mut s = new_doc();
+    let a = square(&mut s, 100.0, 100.0);
+    square(&mut s, 250.0, 100.0);
+    s.execute("select.set", &json!({"ids": [a.0]})).unwrap();
+    let v = ViewInfo::default();
+    s.select_tool("selection", v).unwrap();
+    let shown = |s: &mut Session, v: ViewInfo| {
+        s.pointer(&PointerEvent::new(Move, 275.0, 125.0).with_mods(Mods { alt: true, ..Mods::default() }), v).unwrap();
+        s.overlays(v).into_iter().filter_map(|o| if let Overlay::Distance { text, .. } = o { Some(text) } else { None }).collect::<Vec<_>>()
+    };
+    assert_eq!(shown(&mut s, v), ["100.00 pt"], "the 100 pt gap; the tops and bottoms are level");
+    s.execute("document.setUnits", &json!({"units": "Millimeters"})).unwrap();
+    assert_eq!(shown(&mut s, v), ["35.28 mm"]);
+    assert!(shown(&mut s, ViewInfo { smart_guides: false, ..v }).is_empty(), "View › Smart Guides off");
+    set_pref(&mut s, "distanceGuides", json!(false));
+    assert!(shown(&mut s, v).is_empty(), "Invoke Distance Guides off");
 }
 
 /// Preferences › Smart Guides (#394): Color, Alignment Guides, Anchor/Path Labels, Measurement

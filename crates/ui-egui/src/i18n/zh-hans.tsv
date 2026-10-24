@@ -227,6 +227,9 @@
 	Background Color:	背景颜色：
 	Show Center Mark	显示中心标记
 	Show Cross Hairs	显示十字线
+	Show Video Safe Areas	显示视频安全区域
+	Video Ruler Pixel Aspect Ratio:	视频标尺像素长宽比：
+	Hide Video Rulers	隐藏视频标尺
 	Background Contents	背景内容
 	Background Contents:	背景内容：
 	Background:	背景：
@@ -298,6 +301,15 @@
 	Built-in presets don't change: New… starts an editable copy.	内置预设不会变动：“新建…”会创建可编辑的副本。
 	Bulge…	鼓起…
 	Bullet	项目符号
+	Bullets	项目符号
+	Bullets and Numbering	项目符号和编号
+	Apply Bullets	应用项目符号
+	Numbered List	编号列表
+	Apply Numbers	应用编号
+	Filled Dot	实心圆点
+	Dash	短划线
+	Hollow Circle	空心圆
+	Filled Square	实心方块
 	Butt Cap	平头端点
 	Byte Order:	字节顺序：
 	Calligraphic	书法
@@ -1328,7 +1340,7 @@ file-filter	Templates	模板
 	Clear History	清除历史记录
 	Set History Limit…	设置历史记录上限…
 	History States	历史记录步数
-# History panel: the names of undo steps (`every_undo_label_is_translated`).
+# History panel: the names of undo steps (`untranslated_report` lists any that are missing).
 	Apply Data Set	应用数据集
 	Bloat	膨胀
 	Cancel Pattern Editing	取消图案编辑
@@ -2937,6 +2949,7 @@ font-script	Japanese	汉字
 	Outlines	轮廓
 	Outlines with Source Image	轮廓（带源图像）
 	Source Image	源图像
+	Press and hold to view the source image	按住以查看源图像
 	Image Trace View	图像描摹视图
 	Snap Options	对齐选项
 	Snap to Glyph	靠齐字符
@@ -2959,6 +2972,7 @@ font-script	Japanese	汉字
 	Space Before Paragraph	段前间距
 	Spaces	空格
 	Spacing Guides	间距参考线
+	Invoke Distance Guides	调用距离参考线
 	Spacing:	间距：
 	Spanish	西班牙语
 	Specified Distance	指定距离
@@ -3096,7 +3110,6 @@ font-script	Japanese	汉字
 	Show all open documents	显示所有打开的文档
 	Symbol Instance	符号实例
 	Symbol Libraries	符号库
-	Symbol Libraries (on the roadmap)	符号库 (已列入路线图)
 	Symbol Screener Tool	符号透明度工具
 	Symbol Scruncher Tool	符号紧缩工具
 	Symbol Shifter Tool	符号移位工具
@@ -3226,6 +3239,13 @@ font-script	Japanese	汉字
 	Transparent Background	透明背景
 	Transverse (the page a quarter turn on the paper)	横向 (页面在纸张上转四分之一圈)
 	Trap…	陷印…
+	Trap	陷印
+	Height/Width	高度/宽度
+	Tint Reduction	色调减淡
+	Traps with Process Color	使用印刷色陷印
+	Reverse Traps	反向陷印
+	Precision	精度
+	Remove Redundant Points	删除冗余点
 	Trim	修边
 	Trim mark weight:	剪裁标记宽度：
 	Trim marks	剪裁标记
@@ -3595,7 +3615,7 @@ imageTrace	Outline	轮廓
 	Use Default	使用默认值
 # Status and error messages (`@msg`), translated where the status bar shows them; the message itself
 # stays English for agents and tests. `{_1}`, `{_2}` … stand for the `{}` of the format string, in order
-# (`complete_languages_translate_every_message` lists any that are missing). Command ids, parameter
+# (`untranslated_report` lists any that are missing). Command ids, parameter
 # names and values in backticks or code (`colorModel rgb`, `document.export`) stay as they are.
 # Simplified Chinese: no final 。 unless the English ends with a period; a space between Chinese text and
 # an adjacent Latin word, number or {placeholder}; 、 between the items of a list.
@@ -3652,6 +3672,7 @@ imageTrace	Outline	轮廓
 @msg	the art has no bounds	图稿没有边界
 @msg	Image Trace: the traced image is missing	图像描摹：缺少所描摹的图像
 @msg	Live Paint Merge: select a Live Paint group and the paths to add	实时上色合并：请选择一个实时上色组以及要添加的路径
+@msg	Live Paint takes paths and compound paths: convert type, images and other objects to paths first	实时上色只接受路径和复合路径：请先将文字、图像和其他对象转换为路径
 @msg	Live Paint: select paths or compound paths	实时上色：请选择路径或复合路径
 @msg	Live Paint: these paths are too degenerate to paint	实时上色：这些路径过于退化，无法上色
 @msg	Shape Builder: no region under the pointer	形状生成器：指针下方没有区域
@@ -3977,6 +3998,7 @@ imageTrace	Outline	轮廓
 @msg	invalid image data for `{0}`	`{0}` 的图像数据无效
 @msg	not a VectorCraft file: {0}	不是 VectorCraft 文件：{0}
 @msg	the compressed file unpacks to more than {_1} MB	压缩文件解压后超过 {_1} MB
+@msg	`{key}: {top}` and `options.{key}: {inner}` disagree: give the option once	`{key}: {top}` 与 `options.{key}: {inner}` 不一致：该选项只能给出一次
 @msg	version {0} files can't be compressed: only version {COMPRESSED_SINCE} and later open compressed files	版本 {0} 的文件不能压缩：只有版本 {COMPRESSED_SINCE} 及更高版本能打开压缩文件
 @msg	a bitmap is empty	某个位图为空
 @msg	a bitmap is too large to read	某个位图过大，无法读取
@@ -4043,6 +4065,7 @@ imageTrace	Outline	轮廓
 @msg	{label}…	{label}…
 @msg	no blend options	没有混合选项
 @msg	bad color {v}	颜色 {v} 无效
+@msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio 必须是 0.1 到 10 之间的数字
 @msg	the Color Picker is not open	拾色器未打开
 @msg	the Simplify slider is not open	简化滑块未打开
 @msg	the screen color sampler is already open	屏幕取色器已打开
@@ -4103,6 +4126,7 @@ imageTrace	Outline	轮廓
 @msg	name the file	请为文件命名
 @msg	unknown format	未知格式
 @msg	PDF settings are not an object	PDF 设置不是对象
+@msg	PDF security settings are not an object	PDF 安全性设置不是对象
 @msg	no saved PDF preset named `{name}` (built-in presets are read-only: start a new one from them)	没有名为 `{name}` 的已保存 PDF 预设 (内置预设为只读：请以它们为基础新建一个)
 @msg	Saved to User Defined: {_1}	已保存到“用户定义”：{_1}
 @msg	choose a direction to divide in	请选择分割方向
@@ -4143,6 +4167,12 @@ imageTrace	Outline	轮廓
 @msg	`command` must be a command whose menu item opens a dialog (see ui.menuDialog)	`command` 必须是其菜单项会打开对话框的命令 (请参阅 ui.menuDialog)
 @msg	`mode` must be grayscale, rgb, hsb, cmyk or websafe	`mode` 必须是 grayscale、rgb、hsb、cmyk 或 websafe
 @msg	`{key}` must be true or false	`{key}` 必须是 true 或 false
+@msg	`select` must be true or false	`select` 必须是 true 或 false
+@msg	`minAnchors` and `maxAnchors` must be whole numbers	`minAnchors` 和 `maxAnchors` 必须是整数
+@msg	`{key}` must be a number not below 0	`{key}` 必须是不小于 0 的数字
+@msg	`{key}` must be [x, y, width, height]: four finite numbers, width and height not negative	`{key}` 必须是 [x, y, width, height]：四个有限数字，宽度和高度不能为负
+@msg	`{min_key}` is greater than `{max_key}`	`{min_key}` 大于 `{max_key}`
+@msg	give at least one of `name`, `kind`, `text`, `within`, `intersects`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `minThickness`, `maxThickness`, `minArea`, `maxArea`, `minAnchors`, `maxAnchors`	请至少提供以下其中之一：`name`, `kind`, `text`, `within`, `intersects`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `minThickness`, `maxThickness`, `minArea`, `maxArea`, `minAnchors`, `maxAnchors`
 @msg	brightness must be dark|mediumDark|mediumLight|light	brightness 必须是 dark|mediumDark|mediumLight|light
 @msg	index must be a number or first, previous, next or last	index 必须是数字，或 first、previous、next 或 last
 @msg	index must be a number or first, previous, next or last, not `{other}`	index 必须是数字，或 first、previous、next 或 last，而不是 `{other}`
@@ -4150,7 +4180,7 @@ imageTrace	Outline	轮廓
 @msg	missing `name`	缺少 `name`
 @msg	missing `tool`	缺少 `tool`
 @msg	missing index	缺少 index
-@msg	multiple windows land with M11.5	多窗口将在 M11.5 中提供
+@msg	New Window isn't available yet: a document opens in one window	新建窗口尚不可用：文档在一个窗口中打开
 @msg	no PNG encoder	没有 PNG 编码器
 @msg	no document open	没有打开的文档
 @msg	no effect applied yet	尚未应用任何效果
@@ -4220,6 +4250,7 @@ imageTrace	Outline	轮廓
 @msg	unknown preset (one of {_1})	未知预设 (应为 {_1} 之一)
 @msg	unknown tool or command `{key}`	未知工具或命令 `{key}`
 @msg	{_1} is already used by {_2}	{_1} 已被 {_2} 使用
+@msg	{_1} is reserved by the system	{_1} 已被系统保留
 @msg	Couldn't copy to the system clipboard: {e}	无法复制到系统剪贴板：{e}
 @msg	Couldn't paste from the clipboard: {e}	无法从剪贴板粘贴：{e}
 @msg	nothing selected	未选择任何对象
@@ -4263,6 +4294,8 @@ imageTrace	Outline	轮廓
 @msg	{key} must be an array of non-negative integer object ids	{key} 必须是由非负整数对象 id 组成的数组
 @msg	invalid object id {value}: expected a non-negative integer	无效的对象 id {value}：应为非负整数
 @msg	no such object id {value}	没有 id 为 {value} 的对象
+@msg	id {value} is a layer, not an object	id {value} 是图层，不是对象
+@msg	id {value} is a layer, not an object; move layers with layer.move	id {value} 是图层，不是对象；请使用 layer.move 移动图层
 @msg	automation filesystem access is not granted: read authority is absent: {path}	未授予自动化文件系统访问权限：缺少读取权限：{path}
 @msg	automation filesystem access is not granted: write authority is absent: {path}	未授予自动化文件系统访问权限：缺少写入权限：{path}
 @msg	automation path rejected: outside the read root {root}: {path}	已拒绝自动化路径：位于读取根目录 {root} 之外：{path}
@@ -4608,6 +4641,8 @@ imageTrace	Outline	轮廓
 # The Layers panel, the graphics processor preference and the font menu's filters.
 	All Scripts	所有文字系统
 	Any Kind	所有类型
+	Font Technology	字体技术
+font-technology	Variable	可变
 	Applies the next time VectorCraft starts.	下次启动 VectorCraft 时生效。
 	Collapse to Icons	折叠为图标
 	Decorative	装饰
@@ -5187,6 +5222,7 @@ lighting	Light	光源
 @msg	Persistent libraries not found: {files}	找不到持久库：{files}
 @msg	`{given}` isn't a library panel (see window.swatchLibrary)	`{given}` 不是库面板 (请参阅 window.swatchLibrary)
 @msg	library panel `{given}` isn't open	库面板 `{given}` 未打开
+@msg	too many changed shortcuts	已更改的快捷键过多
 @msg	library panel `{given}` isn't missing its library	库面板 `{given}` 的库未缺失
 @msg	too many library panels were opened in this session	本次会话中打开的库面板过多
 @msg	The image is {_1} × {_2} pixels, more than {LARGE_TRACE_SIDE} on a side: it is traced, but more slowly. A lower-fidelity preset or a smaller copy of the image traces faster.	图像为 {_1} × {_2} 像素，某一边超过 {LARGE_TRACE_SIDE}：会进行描摹，但速度较慢。使用保真度较低的预设或图像的较小副本会更快。
@@ -5196,6 +5232,7 @@ lighting	Light	光源
 	Snap to Perpendicular	对齐垂线
 @msg	unknown snap option `{key}` (use {options})	未知的对齐选项 `{key}`（可用：{options}）
 	Gap Length:	间隙长度：
+@msg	Flat Logo traced the image at {_1} × {_2} pixels, averaged down from {_3} × {_4}.	“扁平徽标”模式已按 {_1} × {_2} 像素描摹图像，由 {_3} × {_4} 平均缩小而来。
 # Links and Attributes: files and URLs handed to other apps.
 @msg	Edit Original opens image and document files only; “{name}” is not one	编辑原稿只能打开图像和文档文件；“{name}” 不是其中之一
 @msg	only http, https and mailto URLs open in the browser, not “{url}”	浏览器中只会打开 http、https 和 mailto 的 URL，不会打开 “{url}”
@@ -5300,3 +5337,54 @@ axis	Y Axis	Y 轴
 @msg	a live effect runs while the document is drawn, so it can't be `heavy`	实时效果在绘制文档时运行，因此不能为 `heavy`
 @msg	an exporter always gets an export's budget: leave `budget` out	导出增效工具始终使用导出的预算：请省略 `budget`
 @msg	“{_1}” asks for a heavy budget (each run up to {minutes} minutes and {times} times the usual instructions): install it with `allowHeavy: true` once the user agrees	“{_1}”需要大量计算预算（每次运行最多 {minutes} 分钟，指令数为通常的 {times} 倍）：请在用户同意后使用 `allowHeavy: true` 安装
+# Actions panel: action sets (#3712).
+	New Set…	新建组…
+	New Set	新建组
+	Set Options…	组选项…
+	Set Options	组选项
+	Create New Set	创建新组
+	Stop Global Edit	停止全局编辑
+	Global Edit Options	全局编辑选项
+	Match	匹配
+	On Artboards	在画板上
+	All Artboards	所有画板
+	Include Objects On Canvas	包括画布上的对象
+	Result(s): {count}	结果：{count}
+@msg	select one object	请选择一个对象
+@msg	Global Edit works on paths, compound paths and symbol instances	全局编辑适用于路径、复合路径和符号实例
+@msg	no similar objects found (rotated or reflected copies are not matched); change the Global Edit Options and try again	未找到相似对象（旋转或镜像的副本不会匹配）；请更改全局编辑选项后重试
+@msg	`artboards`: all or a range such as 1, 3-5, not {v}	`artboards`：应为 all 或 1, 3-5 这样的范围，而不是 {v}
+	Add to Symbols	添加到符号
+	Basic Shapes	基本形状
+	Open Symbol Library	打开符号库
+	Save Symbol Library	保存符号库
+	Save Symbol Library…	保存符号库…
+	Save Symbols…	保存符号…
+	Selected Symbols Only	仅限选择的符号
+	Symbol Libraries Menu	符号库菜单
+	Symbol Library	符号库
+	User Symbol Library 1	用户符号库 1
+	User Symbol Library 2	用户符号库 2
+	User Symbol Library 3	用户符号库 3
+	User Symbol Library 4	用户符号库 4
+	User Symbol Library 5	用户符号库 5
+	User Symbol Library 6	用户符号库 6
+	User Symbol Library 7	用户符号库 7
+	User Symbol Library 8	用户符号库 8
+	User Symbol Library 9	用户符号库 9
+	User Symbol Library 10	用户符号库 10
+	{w} × {h} pt	{w} × {h} pt
+@msg	`{_1}` has no symbols to place	`{_1}` 中没有可置入的符号
+@msg	missing `library` (see symbol.libraries)	缺少 `library`（请参阅 symbol.libraries）
+@msg	no symbol `{n}`	没有符号 `{n}`
+@msg	no symbol `{n}` in `{_1}`	`{_1}` 中没有符号 `{n}`
+@msg	no symbol library `{key}` (see symbol.libraries)	没有符号库 `{key}`（请参阅 symbol.libraries）
+@msg	the document has no symbols to save	文档中没有可保存的符号
+@msg	Trap: select two or more objects filled with solid colours	陷印：请选择两个或更多用实色填充的对象
+@msg	Trap: no edges of different colours meet among the selected objects	陷印：所选对象中没有不同颜色相接的边缘
+@msg	thickness must be from 0.01 to 5000 pt	thickness 必须介于 0.01 到 5000 pt 之间
+@msg	heightWidth must be from 1 to 1000 %	heightWidth 必须介于 1 到 1000 % 之间
+@msg	tintReduction must be from 0 to 100 %	tintReduction 必须介于 0 到 100 % 之间
+	Rectangular Grid Tool Options	矩形网格工具选项
+	Polar Grid Tool Options	极坐标网格工具选项
+	Fill Line	填充线段

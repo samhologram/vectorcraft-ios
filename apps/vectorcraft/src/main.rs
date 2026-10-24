@@ -41,6 +41,7 @@ mod mac_menu;
 mod mac_save_format;
 #[cfg(target_os = "macos")]
 mod mac_screen_color;
+mod mac_tablet;
 #[cfg(target_os = "macos")]
 mod mac_window;
 #[cfg(target_os = "macos")]
@@ -157,7 +158,11 @@ impl App {
         // again on its document when it answers.
         #[cfg(target_os = "macos")]
         if !self.app.file_dialog_open() {
-            open_files(&mut self.app, open_documents::take());
+            let files = open_documents::take();
+            if !files.is_empty() {
+                bring_window_forward(ctx);
+            }
+            open_files(&mut self.app, files);
         }
         self.app.logic(ctx);
         if self.pending_maximize {
@@ -189,6 +194,14 @@ fn end_before_teardown(frames: u64) {
         log::logger().flush();
         std::process::exit(0);
     }
+}
+
+/// Show the window when files are opened from the Finder or the Dock: a minimized window comes back
+/// out of the Dock and the app takes focus, as a document-based Mac app does (#3769).
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn bring_window_forward(ctx: &egui::Context) {
+    ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
+    ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
 }
 
 /// Open files handed to the app (command line, macOS Finder and Dock) as documents. A file that
@@ -297,13 +310,18 @@ fn save_prefs(app: &VectorcraftApp) {
     }
     if let Some(p) = prefs_path() {
         let _ = std::fs::create_dir_all(p.parent().unwrap_or(std::path::Path::new(".")));
-        let mut ui = app.ui.clone();
-        ui.engine_prefs = app.session.prefs.to_json();
-        if let Ok(bytes) = serde_json::to_vec_pretty(&ui) {
+        if let Ok(bytes) = prefs_bytes(app) {
             // Preferences are best effort: a failed write keeps the previous file.
             let _ = fileio::write_atomic(&p, &bytes);
         }
     }
+}
+
+/// The preferences file's contents: the UI state with the engine preferences.
+fn prefs_bytes(app: &VectorcraftApp) -> serde_json::Result<Vec<u8>> {
+    let mut ui = app.ui.clone();
+    ui.engine_prefs = app.session.prefs.to_json();
+    serde_json::to_vec_pretty(&ui)
 }
 
 /// The window file dialogs belong to.
@@ -568,6 +586,9 @@ fn services(parent: Parent, ui: egui::Context) -> Services {
         no_cursor_theme: wayland && cursor_theme::theme_missing(),
         #[cfg(target_os = "linux")]
         stylus: if x11 { tablet::start() } else { None },
+        // macOS reads it from AppKit's events (#852).
+        #[cfg(target_os = "macos")]
+        stylus: mac_tablet::start(),
         read: Some(Box::new(|p: &str| std::fs::read(p).map_err(|e| e.to_string()))),
         write: Some(Box::new(write_file)),
         exists: Some(Box::new(|p: &str| std::path::Path::new(p).exists())),
@@ -1012,11 +1033,13 @@ fn main() -> std::process::ExitCode {
                 }
                 // Linux may not map the window before the first frames, so a saved maximize is retried then (#3635).
                 let pending_maximize = cfg!(target_os = "linux") && app.ui.window.as_ref().is_some_and(|g| g.maximized);
-                // User Defined swatch and graphic style libraries live next to the preferences.
+                // User Defined swatch, graphic style and symbol libraries live next to the preferences.
                 let swatches = prefs_path().and_then(|p| Some(p.parent()?.join("Swatches").to_string_lossy().to_string()));
                 app.session.swatch_libraries.set_user_dir(swatches);
                 let styles = prefs_path().and_then(|p| Some(p.parent()?.join("Graphic Styles").to_string_lossy().to_string()));
                 app.session.style_libraries.set_user_dir(styles);
+                let symbols = prefs_path().and_then(|p| Some(p.parent()?.join("Symbols").to_string_lossy().to_string()));
+                app.session.symbol_libraries.set_user_dir(symbols);
                 // With the User Defined libraries listed, the persistent library panels reopen.
                 vectorcraft_ui_egui::panels::library_panel::restore(&mut app);
                 // So do the Libraries panel's libraries; runs without preferences (agents' test
@@ -1126,6 +1149,49 @@ mod tests {
         vectorcraft_ui_egui::UiState { engine_prefs, ..Default::default() }
     }
 
+    /// Shortcut overrides an earlier version saved still load: its spellings, `panel:` keys, an
+    /// override that can't fire (#487), an entry for a command this version lacks, and an old set
+    /// name.
+    #[test]
+    fn shortcut_overrides_from_an_earlier_version_load() {
+        use serde_json::json;
+        use vectorcraft_ui_egui::{keymap, shortcut_editor};
+        let mut raw = serde_json::to_value(vectorcraft_ui_egui::UiState::default()).unwrap();
+        raw["shortcut_overrides"] = json!({
+            "tool:pen": "Shift+9",
+            "edit.preferences": "",
+            "panel:layers": "Cmd+Alt+Shift+F7",
+            "tool:groupSelection": "Shift+ShiftLeft",
+            "test.unknown": "Cmd+Alt+Shift+F9",
+            "view.grid": "Cmd+Period",
+        });
+        raw["shortcut_set"] = json!(shortcut_editor::LEGACY_PRESETS[0].0);
+        let ui = decode_saved_prefs(&serde_json::to_vec(&raw).unwrap()).unwrap().sanitized();
+        assert_eq!(ui.shortcut_set, shortcut_editor::LEGACY_PRESETS[0].1);
+        let km = keymap::keymap_with(&ui.shortcut_overrides);
+        let text = |key: &str| keymap::effective_with(&km, key);
+        assert_eq!(text("tool:pen").as_deref(), Some("Shift+9"));
+        assert_eq!(text("edit.preferences"), None);
+        assert_eq!(text("panel:layers").as_deref(), Some("Cmd+Alt+Shift+F7"));
+        assert_eq!(text("tool:groupSelection").as_deref(), shortcut_editor::default_of("tool:groupSelection"), "back on its default");
+        assert_eq!(text("view.grid").as_deref(), Some("Cmd+Period"));
+        let period = keymap::vc_chord("Cmd+.").unwrap();
+        assert_eq!(keymap::lookup(&km, &period).map(|c| c.id), Some("view.grid".to_string()));
+        assert_eq!(text("test.unknown").as_deref(), Some("Cmd+Alt+Shift+F9"), "kept");
+        assert!(km.problems().iter().any(|p| format!("{p:?}") == r#"UnknownCommand { key: "test.unknown" }"#), "reported");
+    }
+
+    #[test]
+    fn opening_files_unminimizes_and_focuses_the_window() {
+        let ctx = egui::Context::default();
+        let mut out = ctx.run_ui(egui::RawInput::default(), |ui| bring_window_forward(ui.ctx()));
+        // Nothing paints in the test: drop the font atlas upload egui expects to be applied.
+        out.textures_delta.clear();
+        let cmds = &out.viewport_output[&egui::ViewportId::ROOT].commands;
+        assert!(cmds.contains(&egui::ViewportCommand::Minimized(false)));
+        assert!(cmds.contains(&egui::ViewportCommand::Focus));
+    }
+
     #[test]
     fn unreadable_saved_docking_keeps_preferences_and_every_workspace() {
         use serde_json::json;
@@ -1174,6 +1240,17 @@ mod tests {
             decode_saved_prefs(&serde_json::to_vec(&json!({"toolbar":"invalid"})).unwrap()).is_none(),
             "unrelated fields retain normal strict parsing"
         );
+    }
+
+    #[test]
+    fn the_image_trace_preview_setting_is_kept_across_a_restart() {
+        for preview in [false, true] {
+            let mut app = VectorcraftApp::new(vectorcraft_engine::Session::new(), Default::default());
+            app.ui.image_trace_preview = preview;
+            let saved = prefs_bytes(&app).unwrap();
+            let loaded = decode_saved_prefs(&saved).unwrap().sanitized();
+            assert_eq!(loaded.image_trace_preview, preview, "Preview {preview} after a restart");
+        }
     }
 
     #[test]

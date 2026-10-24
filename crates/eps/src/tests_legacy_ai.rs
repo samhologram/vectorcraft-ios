@@ -62,8 +62,15 @@ fn sample() -> Document {
     let blob = ImageBlob::new("image/png", png);
     let key = blob.content_key();
     doc.images.insert(key.clone(), blob);
-    let im =
-        ImageObject { key, width: 2, height: 1, xf: Affine::new([10.0, 0.0, 0.0, 10.0, 170.0, 70.0]), link: None, placement: Default::default() };
+    let im = ImageObject {
+        key,
+        width: 2,
+        height: 1,
+        xf: Affine::new([10.0, 0.0, 0.0, 10.0, 170.0, 70.0]),
+        link: None,
+        placement: Default::default(),
+        pixels: None,
+    };
     let im = Node::new(doc.alloc_id(), NodeKind::Image(Box::new(im)));
     doc.insert(Some(front), usize::MAX, im).unwrap();
     if let Some(l) = doc.layers.get_mut(1) {
@@ -92,9 +99,9 @@ fn write_with(doc: &Document, o: LegacyAiOptions) -> LegacyAiOutput {
 /// hidden objects shown when `o` writes them visible, and its gradient fills and strokes painted
 /// in their first stop's color.
 fn as_printed(doc: &Document, o: &LegacyAiOptions) -> Document {
-    // A run's glyphs, laid out, as one path with the run's fill (the renderer draws no type), and
-    // its colour bitmap glyphs as images (their pixels added to `images`), its COLR glyphs as their
-    // layers.
+    // A run's glyphs, laid out, with its ruby's, as one path with the run's fill (the renderer
+    // draws no type), and its colour bitmap glyphs as images (their pixels added to `images`), its
+    // COLR glyphs as their layers.
     fn outlined(t: &vectorcraft_doc::TextObject, images: &mut std::collections::BTreeMap<String, ImageBlob>) -> Node {
         let layout = vectorcraft_text::layout(vectorcraft_text::FontDb::global(), t);
         let mut nodes: Vec<Arc<Node>> = t
@@ -103,7 +110,7 @@ fn as_printed(doc: &Document, o: &LegacyAiOptions) -> Document {
             .enumerate()
             .map(|(i, run)| {
                 let mut bp = kurbo::BezPath::new();
-                for g in layout.glyphs.iter().filter(|g| g.run == i) {
+                for g in layout.glyphs.iter().chain(&layout.ruby).filter(|g| g.run == i) {
                     bp.extend(g.outline.iter());
                 }
                 let path = PathData::from_bezpath(&bp).transformed(t.xf);
@@ -114,7 +121,15 @@ fn as_printed(doc: &Document, o: &LegacyAiOptions) -> Document {
             let Some((image, to_text)) = g.placed_image() else { continue };
             let key = image.blob.content_key();
             images.insert(key.clone(), image.blob.clone());
-            let im = ImageObject { key, width: image.width, height: image.height, xf: t.xf * to_text, link: None, placement: Default::default() };
+            let im = ImageObject {
+                key,
+                width: image.width,
+                height: image.height,
+                xf: t.xf * to_text,
+                link: None,
+                placement: Default::default(),
+                pixels: None,
+            };
             nodes.push(Arc::new(Node::new(vectorcraft_doc::NodeId(0), NodeKind::Image(Box::new(im)))));
         }
         // COLR glyphs: their layers.
@@ -264,8 +279,10 @@ fn a_rotated_image_keeps_its_place() {
     doc.images.insert(key.clone(), blob);
     // Turned 90° clockwise on the page: the pixel rows run down, the next row is to the left.
     let xf = Affine::new([0.0, 10.0, -10.0, 0.0, 100.0, 40.0]);
-    let im =
-        Node::new(doc.alloc_id(), NodeKind::Image(Box::new(ImageObject { key, width: 2, height: 1, xf, link: None, placement: Default::default() })));
+    let im = Node::new(
+        doc.alloc_id(),
+        NodeKind::Image(Box::new(ImageObject { key, width: 2, height: 1, xf, link: None, placement: Default::default(), pixels: None })),
+    );
     doc.layers.clear();
     let layer = doc.add_layer(Some("Art"));
     doc.insert(Some(layer), usize::MAX, im).unwrap();
@@ -297,7 +314,10 @@ fn picture(doc: &mut Document, r: Rect) -> Node {
     let key = blob.content_key();
     doc.images.insert(key.clone(), blob);
     let xf = Affine::new([r.width() / 16.0, 0.0, 0.0, r.height() / 16.0, r.x0, r.y0]);
-    Node::new(doc.alloc_id(), NodeKind::Image(Box::new(ImageObject { key, width: 16, height: 16, xf, link: None, placement: Default::default() })))
+    Node::new(
+        doc.alloc_id(),
+        NodeKind::Image(Box::new(ImageObject { key, width: 16, height: 16, xf, link: None, placement: Default::default(), pixels: None })),
+    )
 }
 
 /// A layer `Below` holding a clipping group (a circle clipping an image, as in #2692), a group
@@ -411,7 +431,7 @@ fn empty_images_get_the_size_note_and_undecodable_ones_the_decode_note() {
         let blob = ImageBlob::new("image/png", bytes);
         let key = blob.content_key();
         doc.images.insert(key.clone(), blob);
-        let im = ImageObject { key, width: 4, height: 2, xf: Affine::IDENTITY, link: None, placement: Default::default() };
+        let im = ImageObject { key, width: 4, height: 2, xf: Affine::IDENTITY, link: None, placement: Default::default(), pixels: None };
         let node = Node::new(doc.alloc_id(), NodeKind::Image(Box::new(im)));
         doc.insert(Some(layer), usize::MAX, node).unwrap();
         let out = export_legacy_ai(&doc, &LegacyAiOptions::default()).unwrap();
@@ -997,6 +1017,24 @@ fn variable_font_settings_are_warned_as_left_out() {
     assert!(String::from_utf8(out.bytes).unwrap().contains("(H\\351llo \\2005\\r) Tx\n"), "still written as text");
 }
 
+/// A legacy `.ai` paragraph has no list: type with a bulleted or numbered list is written as its
+/// text, with the warning that the bullets and numbers are left out.
+#[test]
+fn bulleted_and_numbered_lists_are_warned_as_left_out() {
+    use vectorcraft_doc::text::{Bullet, NumberStyle, ParaList};
+    for list in [ParaList::bulleted(Bullet::Square), ParaList::numbered(NumberStyle::UpperRoman)] {
+        let mut doc = typed();
+        let id = texts(&doc)[0].0.id;
+        if let Some(NodeKind::Text(t)) = doc.node_mut(id).map(|n| &mut n.kind) {
+            t.para.list = Some(list);
+            t.normalize_paras();
+        }
+        let out = write(&doc);
+        assert!(out.warnings.iter().any(|w| w == TYPE_ATTRIBUTES && w.contains("bulleted and numbered lists")), "{list:?}: {:?}", out.warnings);
+        assert!(String::from_utf8(out.bytes).unwrap().contains("(H\\351llo \\2005\\r) Tx\n"), "still written as text");
+    }
+}
+
 #[test]
 fn type_reads_back_as_text() {
     use vectorcraft_doc::{Justify, TextKind};
@@ -1077,6 +1115,36 @@ fn type_8_bit_text_cant_hold_and_type_asked_for_as_outlines_are_outlines() {
     let text = String::from_utf8(out.bytes).unwrap();
     assert!(!text.contains(" To\n") && !text.contains("%%DocumentFonts"), "{text}");
     assert!(!out.warnings.iter().any(|w| w == TYPE), "{:?}", out.warnings);
+}
+
+/// Ruby (furigana), which a text object can't hold, makes type 8-bit text could hold outlines,
+/// with the reading's glyphs among them, where the canvas draws them (the file prints as the
+/// document draws).
+#[test]
+fn type_with_ruby_is_outlines_with_the_reading() {
+    use vectorcraft_doc::{RubySpan, TextObject};
+    let typed = |ruby: bool| {
+        let mut doc = Document::new(200.0, 100.0);
+        let layer = doc.layers[0].id;
+        let mut t = TextObject::point(vectorcraft_geom::Point::new(10.0, 60.0), "AB", style(30.0, red()));
+        if ruby {
+            t.ruby = vec![RubySpan::new(0, 2, "xyz")];
+        }
+        let lay = vectorcraft_text::layout(vectorcraft_text::FontDb::global(), &t);
+        let reading = lay.ruby.iter().flat_map(|g| g.outline.elements()).filter(|e| matches!(e, kurbo::PathEl::MoveTo(_))).count();
+        let n = Node::new(doc.alloc_id(), NodeKind::Text(Box::new(t)));
+        doc.insert(Some(layer), usize::MAX, n).unwrap();
+        (doc, reading)
+    };
+    let moves = |text: &str| text.lines().filter(|l| l.ends_with(" m")).count();
+    let (doc, reading) = typed(true);
+    assert!(reading >= 3, "the reading has ink: {reading}");
+    let out = write(&doc);
+    assert!(out.warnings.iter().any(|w| w == TYPE), "{:?}", out.warnings);
+    let with_ruby = String::from_utf8(out.bytes).unwrap();
+    assert!(!with_ruby.contains(" To\n"), "not a text object");
+    let plain = String::from_utf8(write_with(&typed(false).0, LegacyAiOptions { outline_text: true, ..LegacyAiOptions::default() }).bytes).unwrap();
+    assert_eq!(moves(&with_ruby), moves(&plain) + reading, "the reading's contours are written");
 }
 
 /// A layer `Art` holding a group of a shown square and a hidden one; a hidden layer `Off` holding

@@ -180,6 +180,8 @@
 	Anti-aliased Artwork	Загладено произведение
 	Anti-aliasing:	Заглаждане:
 	Any Kind	Всякакъв вид
+	Font Technology	Технология на шрифта
+font-technology	Variable	Променливи
 	Appearance	Външен вид
 	Appearance Attribute	Атрибут на външния вид
 	Appearance Item	Елемент на външния вид
@@ -266,6 +268,9 @@
 	Background Color:	Цвят на фона:
 	Show Center Mark	Показване на централен знак
 	Show Cross Hairs	Показване на кръстосани линии
+	Show Video Safe Areas	Показване на безопасните видеозони
+	Video Ruler Pixel Aspect Ratio:	Пропорция на пиксела на видеолинийките:
+	Hide Video Rulers	Скриване на видеолинийките
 	Background Contents	Съдържание на фона
 	Background Contents:	Съдържание на фона:
 	Background:	Фон:
@@ -334,6 +339,15 @@
 	Built-in presets don't change: New… starts an editable copy.	Вградените предварителни настройки не се променят: „Ново…“ създава редактируемо копие.
 	Bulge…	Издуване…
 	Bullet	Булет
+	Bullets	Булети
+	Bullets and Numbering	Булети и номериране
+	Apply Bullets	Прилагане на булети
+	Numbered List	Номериран списък
+	Apply Numbers	Прилагане на номериране
+	Filled Dot	Плътна точка
+	Dash	Тире
+	Hollow Circle	Празен кръг
+	Filled Square	Плътен квадрат
 	Butt Cap	Плосък край
 	Byte Order:	Подредба на байтовете:
 	Calligraphic	Калиграфски
@@ -1348,7 +1362,7 @@
 	Clear History	Изчистване на историята
 	Set History Limit…	Задаване на ограничение на историята…
 	History States	Състояния на историята
-# History panel: the names of undo steps (`every_undo_label_is_translated`).
+# History panel: the names of undo steps (`untranslated_report` lists any that are missing).
 	Apply Data Set	Прилагане на набор от данни
 	Cancel Pattern Editing	Отказ от редактирането на мостра
 	Copy Appearance	Копиране на външния вид
@@ -3001,6 +3015,7 @@
 	Outlines	Контури
 	Outlines with Source Image	Контури с изходно изображение
 	Source Image	Изходно изображение
+	Press and hold to view the source image	Задръжте натиснато, за да видите изходното изображение
 	Image Trace View	Изглед на трасиране на изображение
 	Snap Options	Опции за прилепване
 	Snap to Glyph	Прилепване към глиф
@@ -3023,6 +3038,7 @@
 	Space Before Paragraph	Разстояние преди абзац
 	Spaces	Интервали
 	Spacing Guides	Водачи за разстояние
+	Invoke Distance Guides	Извикване на водачи за отстояния
 	Spacing:	Разстояние:
 	Spanish	Испански
 	Specified Distance	Упоменато разстояние
@@ -3160,7 +3176,6 @@
 	Show all open documents	Показване на всички отворени документи
 	Symbol Instance	Екземпляр на символ
 	Symbol Libraries	Библиотеки със символи
-	Symbol Libraries (on the roadmap)	Библиотеки със символи (в план-графика)
 	Symbol Screener Tool	Инструмент „Филтър на символи“
 	Symbol Scruncher Tool	Инструмент „Свиване на символи“
 	Symbol Shifter Tool	Инструмент „Преместване на символи“
@@ -3288,6 +3303,13 @@
 	Transparent Background	Прозрачен фон
 	Transverse (the page a quarter turn on the paper)	Напречно (страницата е завъртена на четвърт оборот върху хартията)
 	Trap…	Застъпване…
+	Trap	Застъпване
+	Height/Width	Височина/ширина
+	Tint Reduction	Намаляване на тона
+	Traps with Process Color	Застъпвания с триадни цветове
+	Reverse Traps	Обратни застъпвания
+	Precision	Точност
+	Remove Redundant Points	Премахване на излишните точки
 	Trim	Изрязване
 	Trim mark weight:	Дебелина на маркировките за изрязване:
 	Trim marks	Маркировки за изрязване
@@ -3732,6 +3754,7 @@ axis	Both	И двете
 @msg	Installed plug-in {_1}	Инсталирана добавка {_1}
 @msg	Internal error: {msg} (please report this bug)	Вътрешна грешка: {msg} (моля, докладвайте този софтуерен дефект)
 @msg	Live Paint Merge: select a Live Paint group and the paths to add	Обединяване в интерактивно боядисване: изберете група за интерактивно боядисване и пътищата за добавяне
+@msg	Live Paint takes paths and compound paths: convert type, images and other objects to paths first	Интерактивното боядисване приема пътища и съставни пътища: първо преобразувайте текста, изображенията и другите обекти в пътища
 @msg	Live Paint: select paths or compound paths	Интерактивно боядисване: изберете пътища или съставни пътища
 @msg	Live Paint: these paths are too degenerate to paint	Интерактивно боядисване: тези пътища са твърде дегенерирали за боядисване
 @msg	Make Guides: select paths	Създаване на водачи: изберете пътища
@@ -3743,6 +3766,7 @@ axis	Both	И двете
 @msg	Opened {url}	Отворено: {url}
 @msg	Outline Stroke: no stroked paths selected	Преобразуване на щрих в контур: няма избрани пътища с щрих
 @msg	PDF settings are not an object	Настройките за PDF не са обект
+@msg	PDF security settings are not an object	Настройките за сигурност на PDF не са обект
 @msg	PDF writer error: {0}	Грешка на PDF записа: {0}
 @msg	Packaged {n} file(s) in {folder} {note}	Пакетирани са {n} файла в {folder}{note}
 @msg	Packaged {n} file(s){note}	Пакетирани са {n} файла{note}
@@ -3863,6 +3887,7 @@ axis	Both	И двете
 @msg	axis must be "vertical", "horizontal" or an angle in degrees, not `{v}`	оста трябва да бъде "vertical", "horizontal" или ъгъл в градуси, а не `{v}`
 @msg	background {other}: transparent, white, black or a colour such as "#ff8800"	фон {other}: прозрачен, бял, черен или цвят като "#ff8800"
 @msg	bad color {v}	грешен цвят {v}
+@msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio трябва да бъде число от 0,1 до 10
 @msg	bad colour `{hex}` (#rrggbb)	грешен цвят `{hex}` (#rrggbb)
 @msg	bad page tree	повредено дърво на страниците
 @msg	bad shortcut	грешен клавишен бърз път
@@ -3936,7 +3961,7 @@ axis	Both	И двете
 @msg	missing index	липсва индекс
 @msg	missing number `{key}`	липсва число `{key}`
 @msg	missing integer `{key}`	липсва цяло число `{key}`
-@msg	multiple windows land with M11.5	множество прозорци се зареждат с M11.5
+@msg	New Window isn't available yet: a document opens in one window	Нов прозорец още не е наличен: документът се отваря в един прозорец
 @msg	name the file	именувайте файла
 @msg	no CSS to copy: select objects with CSS of their own	няма CSS за копиране: изберете обекти със собствен CSS
 @msg	no Live Paint edge near that point	няма ръб за интерактивно оцветяване близо до тази точка
@@ -4232,6 +4257,7 @@ axis	Both	И двете
 @msg	{_1} font families available	наличности на шрифтови семейства: {_1}
 @msg	{_1} is a live effect (Effect › Plug-ins)	{_1} е динамичен ефект (Ефект › Добавки)
 @msg	{_1} is already used by {_2}	{_1} вече се използва от {_2}
+@msg	{_1} is reserved by the system	{_1} е запазено от системата
 @msg	{_1} linked file(s) can't be read here: their previews show	свързаните файлове {_1} не могат да бъдат прочетени тук: показват се техните прегледи
 @msg	{_1} linked image(s) changed on disk: Update Links shows the new versions	свързаните изображения {_1} са променени на диска: „Обновяване на връзките“ показва новите версии
 @msg	Updated {_1} linked file(s) changed on disk	Обновени са свързани файлове {_1}, променени на диска
@@ -4725,6 +4751,7 @@ lighting	Light	Светлина
 	Brown	Кафяв
 	Business Card 3.5 × 2 in	Визитка 3,5 × 2 инча
 	Business Card 85 × 55 mm	Визитка 85 × 55 мм
+	Business Card 91 × 55 mm	Визитка 91 × 55 мм
 	CRLF (Windows)	CRLF (Windows)
 	Cap Height	Височина на главни букви
 	Chevron	Шеврон
@@ -5409,3 +5436,44 @@ axis	Y Axis	Y ос
 	The plug-in is computing…	Приставката изчислява…
 	Inspect Plug-in	Проверка на приставка
 	Cancel Plug-in Run	Отказ от изпълнението на приставката
+# Actions panel: action sets (#3712).
+	New Set…	Нов набор…
+	New Set	Нов набор
+	Set Options…	Опции на набора…
+	Set Options	Опции на набора
+	Create New Set	Създаване на нов набор
+	Stop Global Edit	Край на глобалното редактиране
+	Global Edit Options	Опции за глобално редактиране
+	Match	Съвпадение
+	On Artboards	В работните области
+	All Artboards	Всички работни области
+	Include Objects On Canvas	Включване на обекти от платното
+	Result(s): {count}	Резултат(и): {count}
+	Add to Symbols	Добавяне към символи
+	Basic Shapes	Основни фигури
+	Open Symbol Library	Отваряне на библиотека със символи
+	Save Symbol Library	Запазване на библиотека със символи
+	Save Symbol Library…	Запази библиотека със символи…
+	Save Symbols…	Запази символи…
+	Selected Symbols Only	Само избрани символи
+	Symbol Libraries Menu	Меню с библиотеки със символи
+	Symbol Library	Библиотека със символи
+	User Symbol Library 1	Потребителска библиотека със символи 1
+	User Symbol Library 2	Потребителска библиотека със символи 2
+	User Symbol Library 3	Потребителска библиотека със символи 3
+	User Symbol Library 4	Потребителска библиотека със символи 4
+	User Symbol Library 5	Потребителска библиотека със символи 5
+	User Symbol Library 6	Потребителска библиотека със символи 6
+	User Symbol Library 7	Потребителска библиотека със символи 7
+	User Symbol Library 8	Потребителска библиотека със символи 8
+	User Symbol Library 9	Потребителска библиотека със символи 9
+	User Symbol Library 10	Потребителска библиотека със символи 10
+	{w} × {h} pt	{w} × {h} pt
+@msg	Trap: select two or more objects filled with solid colours	Застъпване: изберете два или повече обекта, запълнени с плътни цветове
+@msg	Trap: no edges of different colours meet among the selected objects	Застъпване: сред избраните обекти няма допиращи се ръбове с различни цветове
+@msg	thickness must be from 0.01 to 5000 pt	thickness трябва да е от 0,01 до 5000 pt
+@msg	heightWidth must be from 1 to 1000 %	heightWidth трябва да е от 1 до 1000 %
+@msg	tintReduction must be from 0 to 100 %	tintReduction трябва да е от 0 до 100 %
+	Rectangular Grid Tool Options	Опции на инструмента „Правоъгълна мрежа“
+	Polar Grid Tool Options	Опции на инструмента „Полярна мрежа“
+	Fill Line	Запълване на линия

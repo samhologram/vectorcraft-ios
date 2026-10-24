@@ -126,8 +126,13 @@ pub(crate) fn document_art(
         return super::pdf_art(name, bytes, path, page as usize, o, bounding, cmd);
     }
     let mut l = fileio::load(name, bytes)?;
-    // Its linked images show their files; its placed documents stay as they are.
-    super::super::links::resolve(&mut l.doc, path, false, false);
+    // Its linked images show their files; its placed documents stay as they are, unless their
+    // stored bytes are lost, when resolving reads their files, which can place this one again.
+    // A document already being read further up, or past [`MAX_NESTED_READS`] of them, has its links
+    // left as stored.
+    if let Some(_reading) = Reading::enter(bytes) {
+        super::super::links::resolve(&mut l.doc, path, false, false);
+    }
     l.doc.drop_edit_modes();
     let n = l.doc.artboards.len();
     let board = (page as usize).checked_sub(1).and_then(|i| l.doc.artboards.get(i)).map(|a| a.rect);
@@ -138,6 +143,33 @@ pub(crate) fn document_art(
     let frame = if bounding { super::shown_bounds(&symbols, &nodes) } else { Some(board) };
     let frame = frame.filter(|r| r.width() > 0.0 || r.height() > 0.0).ok_or_else(|| bad(cmd, format!("`{file}` has no art to place")))?;
     Ok(DocumentArt { doc: l.doc, nodes, clip: (!bounding).then_some(board), frame, warnings: l.warnings })
+}
+
+/// The most placed documents read inside one another while their links are resolved.
+const MAX_NESTED_READS: usize = 8;
+
+std::thread_local! {
+    /// The hashes of the documents whose links are being resolved on this thread, outermost first.
+    static READING: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// A document's links being resolved ([`READING`]): the entry goes when this does.
+struct Reading;
+
+impl Reading {
+    /// `None` when the document of `bytes` is already being read, or [`MAX_NESTED_READS`] are.
+    fn enter(bytes: &[u8]) -> Option<Self> {
+        let hash = hash_bytes(bytes);
+        READING.with_borrow_mut(|r| (r.len() < MAX_NESTED_READS && !r.contains(&hash)).then(|| r.push(hash))).map(|()| Reading)
+    }
+}
+
+impl Drop for Reading {
+    fn drop(&mut self) {
+        READING.with_borrow_mut(|r| {
+            r.pop();
+        });
+    }
 }
 
 /// `nodes` as one group, clipped to `clip` (its own ids: what drawing reads).
@@ -159,7 +191,15 @@ pub(crate) fn read_document(p: &PlacedDocument, bytes: &[u8]) -> Option<(Documen
 /// `p`'s file read again, while it is the file it was read from (how the document model gets it
 /// when only the preview is stored, [`vectorcraft_doc::placed_document::set_file_reader`]).
 pub(crate) fn read_file_again(p: &PlacedDocument) -> Option<Vec<u8>> {
-    let bytes = fileio::read_file(&p.link.path).ok()?;
+    // The stored path is followed as stored paths are, but with no document to share a network
+    // folder with: a file on another computer is never read here, even one resolving refused
+    // (which leaves the stored path in place), so embedding or exporting can't connect to it.
+    let path = fileio::document_path(&p.link.path, None).ok()?;
+    // One byte over the limit tells a file that is too big, without reading it all.
+    let bytes = fileio::read_file_head(&path, MAX_FILE + 1).ok()?;
+    if bytes.len() > MAX_FILE {
+        return None;
+    }
     if p.link.hash.as_ref().is_some_and(|h| *h != hash_bytes(&bytes)) {
         return None;
     }
@@ -186,7 +226,10 @@ pub(crate) struct Source {
 pub(crate) fn source(name: &str, bytes: &[u8], path: Option<&str>, page: u32, bounding: bool, page_box: PageBox, cmd: &str) -> Result<Source> {
     // The same document placed the same way is read once (placing it again is free).
     let key = key_for(&hash_bytes(bytes), page, bounding, page_box);
-    if let Some(s) = lock_memo().iter().find(|s| s.key == key).cloned() {
+    // Resolving its links depends on where the file is and on what the caller may read, so a hit
+    // needs the same path, and nothing is shared with or from a confined (automation) caller.
+    let confined = crate::file_access::current().is_some();
+    if !confined && let Some((_, s)) = lock_memo().iter().find(|(at, s)| s.key == key && at.as_deref() == path).cloned() {
         return Ok(s);
     }
     let a = document_art(name, bytes, path, page, bounding, page_box, cmd)?;
@@ -206,11 +249,13 @@ pub(crate) fn source(name: &str, bytes: &[u8], path: Option<&str>, page: u32, bo
     // Drawing it needn't read it again.
     vectorcraft_doc::placed_document::prime(&shown, blob.bytes.clone(), (a.doc, art, a.frame));
     let s = Source { blob, key, page_box, frame: a.frame, warnings: a.warnings };
-    let mut m = lock_memo();
-    if m.len() >= MEMO_SIZE {
-        m.remove(0);
+    if !confined {
+        let mut m = lock_memo();
+        if m.len() >= MEMO_SIZE {
+            m.remove(0);
+        }
+        m.push((path.map(str::to_string), s.clone()));
     }
-    m.push(s.clone());
     Ok(s)
 }
 
@@ -218,9 +263,9 @@ pub(crate) fn source(name: &str, bytes: &[u8], path: Option<&str>, page: u32, bo
 const MEMO_SIZE: usize = 32;
 
 /// Files read lately for placing, by key.
-static MEMO: std::sync::Mutex<Vec<Source>> = std::sync::Mutex::new(Vec::new());
+static MEMO: std::sync::Mutex<Vec<(Option<String>, Source)>> = std::sync::Mutex::new(Vec::new());
 
-fn lock_memo() -> std::sync::MutexGuard<'static, Vec<Source>> {
+fn lock_memo() -> std::sync::MutexGuard<'static, Vec<(Option<String>, Source)>> {
     // Entries are only pushed and removed: a panic while held leaves it whole.
     MEMO.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
 }

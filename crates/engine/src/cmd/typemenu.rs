@@ -43,7 +43,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Convert To Point Type",
             ["Type"],
             None,
-            "{ids?|id?} area type → point type; soft line wraps become line breaks → {ids}",
+            "{ids?|id?} area type → point type; soft line wraps become line breaks, and a frame of threaded text leaves its thread with the text it holds → {ids}",
             has_selection,
             to_point
         ),
@@ -329,6 +329,8 @@ fn to_point(s: &mut Session, p: &Value) -> Result<Value> {
             let Some(NodeKind::Text(t)) = d.node_mut(*id).map(|n| &mut n.kind) else { continue };
             let TextKind::Area { frame } = &t.kind else { continue };
             let fb = frame.bounds().unwrap_or_default();
+            // Point type is in no thread: its first paragraph starts in it.
+            t.first_para_continues = false;
             let lay = vectorcraft_text::layout(vectorcraft_text::FontDb::global(), t);
             let plain = t.plain_text();
             let baseline = lay.lines.first().map(|l| l.baseline).unwrap_or(fb.y0 + t.first_style().size * 0.8);

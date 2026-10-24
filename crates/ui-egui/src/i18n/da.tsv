@@ -284,6 +284,15 @@
 	Glyphs	Glyffer
 	Insert Special Character	Indsæt specialtegn
 	Bullet	Kugletegn
+	Bullets	Kugletegn
+	Bullets and Numbering	Kugletegn og nummerering
+	Apply Bullets	Anvend kugletegn
+	Numbered List	Nummereret liste
+	Apply Numbers	Anvend nummerering
+	Filled Dot	Udfyldt prik
+	Dash	Tankestreg
+	Hollow Circle	Tom cirkel
+	Filled Square	Udfyldt firkant
 	Copyright Symbol	Copyrighttegn
 	Ellipsis	Udeladelsesprikker
 	Paragraph Symbol	Afsnitstegn
@@ -1609,6 +1618,13 @@ lighting	Light	Lys
 	Repeat Pathfinder	Gentag Pathfinder
 	Repeat {name}	Gentag {name}
 	Trap…	Trap…
+	Trap	Trap
+	Height/Width	Højde/bredde
+	Tint Reduction	Tonereduktion
+	Traps with Process Color	Traps med procesfarver
+	Reverse Traps	Omvendte traps
+	Precision	Præcision
+	Remove Redundant Points	Fjern overflødige punkter
 	Bottom in Front	Bund forrest
 	Brick by Column	Mursten efter kolonne
 	Brick by Row	Mursten efter række
@@ -1735,7 +1751,6 @@ lighting	Light	Lys
 	{kind}, {model}	{kind}, {model}
 	No symbols in this document	Ingen symboler i dette dokument
 	Select art and click New Symbol to make one.	Markér grafik, og klik på Nyt symbol for at oprette et.
-	Symbol Libraries (on the roadmap)	Symbolbiblioteker (på roadmappen)
 	Align On:	Justér på:
 	Bottom-Justified Tab	Bundjusteret tabulator
 	Center-Justified Tab	Midterjusteret tabulator
@@ -2237,6 +2252,9 @@ lighting	Light	Lys
 	Background Color:	Baggrundsfarve:
 	Show Center Mark	Vis midtermærke
 	Show Cross Hairs	Vis trådkors
+	Show Video Safe Areas	Vis sikre videoområder
+	Video Ruler Pixel Aspect Ratio:	Pixelformat for videolinealer:
+	Hide Video Rulers	Skjul videolinealer
 	Client-side (.html)	Klientbaseret (.html)
 	Color Reduction:	Farvereduktion:
 	Lossless (lossy WebP isn't available yet)	Tabsfri (WebP med tab er ikke tilgængelig endnu)
@@ -3260,6 +3278,7 @@ theme	Appearance	Udseende
 	Size/Leading	Størrelse/linjeafstand
 	Snapping Tolerance	Snap-tolerance
 	Spacing Guides	Afstandshjælpelinjer
+	Invoke Distance Guides	Aktivér hjælpelinjer for afstandsmåling
 	Spanish	Spansk
 	Subdivisions	Underinddelinger
 	Templates Folder	Skabelonmappe
@@ -3563,6 +3582,8 @@ effect	Regular	Regular
 	Put back in the dock	Sæt tilbage i dokken
 	All Scripts	Alle scripts
 	Any Kind	Enhver type
+	Font Technology	Skrifttypeteknologi
+font-technology	Variable	Variable
 	Decorative	Dekorative
 	Favorites	Favoritter
 	Latin	Latinsk
@@ -3656,6 +3677,7 @@ effect	Regular	Regular
 	View:	Visning:
 	Tracing Result	Sporingsresultat
 	Outlines with Source Image	Konturer med kildebillede
+	Press and hold to view the source image	Hold nede for at se kildebilledet
 	SVG Options	SVG-indstillinger
 	Maximize	Maksimér
 	Restore	Gendan
@@ -3853,6 +3875,7 @@ imageTrace	Outline	Kontur
 @msg	Installed plug-in {_1}	Installerede plug-in'en {_1}
 @msg	Internal error: {msg} (please report this bug)	Intern fejl: {msg} (meld venligst denne fejl)
 @msg	Live Paint Merge: select a Live Paint group and the paths to add	Live Paint-fletning: markér en Live Paint-gruppe og de kurver, der skal tilføjes
+@msg	Live Paint takes paths and compound paths: convert type, images and other objects to paths first	Live Paint tager kurver og sammensatte kurver: konvertér først tekst, billeder og andre objekter til kurver
 @msg	Live Paint: select paths or compound paths	Live Paint: markér kurver eller sammensatte kurver
 @msg	Live Paint: these paths are too degenerate to paint	Live Paint: disse kurver er for degenererede til at blive malet
 @msg	Make Guides: select paths	Opret hjælpelinjer: markér kurver
@@ -3864,6 +3887,7 @@ imageTrace	Outline	Kontur
 @msg	Opened {url}	Åbnede {url}
 @msg	Outline Stroke: no stroked paths selected	Konturér kurve: ingen kurver med kontur er markeret
 @msg	PDF settings are not an object	PDF-indstillinger er ikke et objekt
+@msg	PDF security settings are not an object	PDF-sikkerhedsindstillinger er ikke et objekt
 @msg	PDF writer error: {0}	PDF-skriverfejl: {0}
 @msg	Packaged {n} file(s) in {folder} {note}	Pakkede {n} fil(er) i {folder}{note}
 @msg	Packaged {n} file(s){note}	Pakkede {n} fil(er){note}
@@ -3979,6 +4003,7 @@ imageTrace	Outline	Kontur
 @msg	axis must be "vertical", "horizontal" or an angle in degrees, not `{v}`	aksen skal være "vertical", "horizontal" eller en vinkel i grader, ikke `{v}`
 @msg	background {other}: transparent, white, black or a colour such as "#ff8800"	baggrund {other}: gennemsigtig, hvid, sort eller en farve som "#ff8800"
 @msg	bad color {v}	ugyldig farve {v}
+@msg	videoRulerPixelAspectRatio must be a number from 0.1 to 10	videoRulerPixelAspectRatio skal være et tal fra 0,1 til 10
 @msg	bad colour `{hex}` (#rrggbb)	ugyldig farve `{hex}` (#rrggbb)
 @msg	bad page tree	ugyldigt sidetræ
 @msg	bad shortcut	ugyldig genvej
@@ -4048,7 +4073,7 @@ imageTrace	Outline	Kontur
 @msg	missing index	indeks mangler
 @msg	missing number `{key}`	tallet `{key}` mangler
 @msg	missing integer `{key}`	heltallet `{key}` mangler
-@msg	multiple windows land with M11.5	flere vinduer lander med M11.5
+@msg	New Window isn't available yet: a document opens in one window	Nyt vindue er ikke tilgængeligt endnu: et dokument åbnes i ét vindue
 @msg	name the file	giv filen et navn
 @msg	no CSS to copy: select objects with CSS of their own	ingen CSS at kopiere: markér objekter med deres egen CSS
 @msg	no Live Paint edge near that point	ingen Live Paint-kant i nærheden af det punkt
@@ -4329,6 +4354,7 @@ imageTrace	Outline	Kontur
 @msg	{_1} font families available	{_1} skrifttypefamilier tilgængelige
 @msg	{_1} is a live effect (Effect › Plug-ins)	{_1} er en live-effekt (Effekt › Plug-ins)
 @msg	{_1} is already used by {_2}	{_1} bruges allerede af {_2}
+@msg	{_1} is reserved by the system	{_1} er reserveret af systemet
 @msg	{_1} linked file(s) can't be read here: their previews show	{_1} linket(e) fil(er) kan ikke læses her: deres forhåndsvisninger vises
 @msg	{_1} linked image(s) changed on disk: Update Links shows the new versions	{_1} linket(e) billede(r) er ændret på disken: Opdatér links viser de nye versioner
 @msg	{_1}: not saved, so not closed	{_1}: ikke gemt, derfor ikke lukket
@@ -4530,6 +4556,7 @@ imageTrace	Outline	Kontur
 	Logo 1000×1000	Logo 1000×1000
 	Business Card 3.5 × 2 in	Visitkort 3,5 × 2 tommer
 	Business Card 85 × 55 mm	Visitkort 85 × 55 mm
+	Business Card 91 × 55 mm	Visitkort 91 × 55 mm
 	Letterhead Letter	Brevpapir Letter
 	Letterhead A4	Brevpapir A4
 	Envelope DL	Konvolut DL
@@ -5425,3 +5452,44 @@ axis	Y Axis	Y-akse
 	The plug-in is computing…	Plug-in'en regner…
 	Inspect Plug-in	Undersøg plug-in
 	Cancel Plug-in Run	Annullér plug-in-kørsel
+# Actions panel: action sets (#3712).
+	New Set…	Nyt sæt…
+	New Set	Nyt sæt
+	Set Options…	Indstillinger for sæt…
+	Set Options	Indstillinger for sæt
+	Create New Set	Opret nyt sæt
+	Stop Global Edit	Stop global redigering
+	Global Edit Options	Indstillinger for global redigering
+	Match	Match
+	On Artboards	På tegneflader
+	All Artboards	Alle tegneflader
+	Include Objects On Canvas	Medtag objekter på lærredet
+	Result(s): {count}	Resultat(er): {count}
+	Add to Symbols	Føj til symboler
+	Basic Shapes	Grundlæggende former
+	Open Symbol Library	Åbn symbolbibliotek
+	Save Symbol Library	Gem symbolbibliotek
+	Save Symbol Library…	Gem symbolbibliotek…
+	Save Symbols…	Gem symboler…
+	Selected Symbols Only	Kun valgte symboler
+	Symbol Libraries Menu	Menu med symbolbiblioteker
+	Symbol Library	Symbolbibliotek
+	User Symbol Library 1	Brugersymbolbibliotek 1
+	User Symbol Library 2	Brugersymbolbibliotek 2
+	User Symbol Library 3	Brugersymbolbibliotek 3
+	User Symbol Library 4	Brugersymbolbibliotek 4
+	User Symbol Library 5	Brugersymbolbibliotek 5
+	User Symbol Library 6	Brugersymbolbibliotek 6
+	User Symbol Library 7	Brugersymbolbibliotek 7
+	User Symbol Library 8	Brugersymbolbibliotek 8
+	User Symbol Library 9	Brugersymbolbibliotek 9
+	User Symbol Library 10	Brugersymbolbibliotek 10
+	{w} × {h} pt	{w} × {h} pt
+@msg	Trap: select two or more objects filled with solid colours	Trap: Vælg to eller flere objekter udfyldt med ensfarvede farver
+@msg	Trap: no edges of different colours meet among the selected objects	Trap: Ingen kanter i forskellige farver mødes blandt de valgte objekter
+@msg	thickness must be from 0.01 to 5000 pt	thickness skal være fra 0,01 til 5000 pt
+@msg	heightWidth must be from 1 to 1000 %	heightWidth skal være fra 1 til 1000 %
+@msg	tintReduction must be from 0 to 100 %	tintReduction skal være fra 0 til 100 %
+	Rectangular Grid Tool Options	Indstillinger for rektangulært gitterværktøj
+	Polar Grid Tool Options	Indstillinger for polært gitterværktøj
+	Fill Line	Udfyld linje

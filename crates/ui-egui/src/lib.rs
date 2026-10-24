@@ -36,6 +36,7 @@ pub mod i18n;
 pub mod icon_data;
 pub mod icons;
 pub mod io;
+pub mod keymap;
 pub mod menus;
 pub mod native_menu;
 pub mod opening;
@@ -322,9 +323,10 @@ pub struct Services {
     /// default one would never come back once the canvas hid it: the canvas keeps the system
     /// pointer visible next to the tool glyph ([`cursors::hide_system_pointer`], #2450).
     pub no_cursor_theme: bool,
-    /// The pen pressure the host reads from the system itself (desktop Linux under X11 and
-    /// XWayland). The canvas uses it when a frame's events carry no touch force. Without it, pen
-    /// pressure comes from touch events only ([`stylus`]).
+    /// The pen pressure and pen end the host reads from the system itself (desktop Linux under
+    /// X11 and XWayland). The canvas uses the pressure when a frame's events carry no touch force,
+    /// and the end to switch to the Eraser tool and back. Without it, pen pressure comes from
+    /// touch events only ([`stylus`]).
     pub stylus: Option<stylus::StylusFeed>,
 }
 
@@ -429,6 +431,9 @@ pub struct CacheKey {
     pub rich_black: bool,
     /// Colour and style of guide paths ([`vectorcraft_render::RenderOptions::guide`]).
     pub guide: ([u8; 3], bool),
+    /// The Image Trace objects drawn with their source image
+    /// ([`vectorcraft_render::RenderOptions::trace_source`]).
+    pub trace_source: Option<std::sync::Arc<Vec<vectorcraft_doc::NodeId>>>,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -519,6 +524,8 @@ pub struct VectorcraftApp {
     font_install_check_at: f64,
     /// Keyboard pastes of something other than text (see [`shortcuts::PasteChord`]).
     pub(crate) paste_chord: shortcuts::PasteChord,
+    /// Runs the frame's key presses against the keymap ([`shortcuts::handle`]).
+    pub(crate) dispatcher: craft_keymap::egui::Dispatcher,
     /// Saves and exports running in the background (Preferences → File Handling).
     pub background: background::Background,
     /// Documents being read off the UI thread ([`opening`]).
@@ -554,6 +561,9 @@ pub struct VectorcraftApp {
     /// This frame carries input the control channel injected ([`Self::raw_input_hook`]): it runs
     /// confined to [`Self::automation_roots`].
     synthetic_frame: bool,
+    /// The pen end the canvas saw last and the tool its eraser end stands in for
+    /// ([`stylus::sync_eraser_tool`]).
+    pub(crate) pen_end: stylus::PenEnd,
 }
 
 /// A window capture asked for through the control channel (`ui.screenshot`), answered once a
@@ -652,6 +662,8 @@ impl VectorcraftApp {
             #[cfg(not(target_arch = "wasm32"))]
             font_install_check_at: f64::NEG_INFINITY,
             paste_chord: Default::default(),
+            // Held keys repeat their command (Cmd+= keeps zooming in).
+            dispatcher: craft_keymap::egui::Dispatcher::new().with_repeat(true),
             background: Default::default(),
             opening: Default::default(),
             plugin_runs: Default::default(),
@@ -667,6 +679,7 @@ impl VectorcraftApp {
             scrub_scope: None,
             automation_roots: None,
             synthetic_frame: false,
+            pen_end: Default::default(),
         }
     }
 
@@ -980,9 +993,24 @@ impl VectorcraftApp {
 
     /// Select a tool (also used by the toolbar and shortcuts).
     pub fn select_tool(&mut self, id: &str) {
+        // The tip of a pen whose eraser end selected the Eraser doesn't undo this choice.
+        self.pen_end.forget_tool();
+        self.activate_tool(id, true);
+    }
+
+    /// Go back to tool `id` after a tool that stood in for it (the pen's eraser end, [`stylus`]):
+    /// a perspective grid hidden meanwhile stays hidden.
+    pub(crate) fn return_to_tool(&mut self, id: &str) {
+        self.activate_tool(id, false);
+    }
+
+    /// Make tool `id` active: chosen afresh (`fresh`, [`vectorcraft_engine::Session::select_tool`]),
+    /// or back from a tool that stood in for it ([`vectorcraft_engine::Session::switch_tool`]).
+    fn activate_tool(&mut self, id: &str, fresh: bool) {
         let v = self.view_info();
         let before = self.session.tool_id();
-        if let Err(e) = self.session.select_tool(id, v) {
+        let switched = if fresh { self.session.select_tool(id, v) } else { self.session.switch_tool(id, v) };
+        if let Err(e) = switched {
             self.ui.status = e.to_string();
         }
         // A newly chosen Artboard tool starts on the active artboard (the view's).
@@ -1385,6 +1413,7 @@ impl VectorcraftApp {
             // The timer and heartbeat run in an idle window too.
             ctx.request_repaint_after(std::time::Duration::from_secs_f64(wait));
         }
+        crate::keymap::note_os(ctx);
         shortcut_editor::sync(&self.ui);
         prefs_dialog::apply_runtime(self, ctx);
         // The OS title bar (and the taskbar / Alt-Tab entry) follows the active file; with the

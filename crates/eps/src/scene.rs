@@ -288,7 +288,7 @@ impl<'a> Scene<'a> {
                 self.shape(n, &bp, *rule);
             }
             NodeKind::Text(t) => self.text(n, t),
-            NodeKind::Image(im) => self.image(&im.key, self.doc.images.get(&im.key), im.width, im.height, im.xf),
+            NodeKind::Image(im) => self.image(&im.key, self.doc.image_blob(im), im.width, im.height, im.xf),
             NodeKind::SymbolInstance { symbol, xf } => {
                 if let Some(sym) = self.doc.symbols.iter().find(|s| &s.name == symbol)
                     && self.nest < MAX_NEST
@@ -595,6 +595,10 @@ impl<'a> Scene<'a> {
                 if let Some(art) = g.placed_colour(Affine::IDENTITY) {
                     self.node(&art, true);
                 }
+            }
+            // Ruby (furigana) glyphs in their base text's run's paint, as the canvas draws them.
+            for g in layout.ruby.iter().filter(|g| g.run == i) {
+                bp.extend(g.outline.iter());
             }
             if bp.elements().is_empty() {
                 continue;
