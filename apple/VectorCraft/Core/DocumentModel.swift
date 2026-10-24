@@ -39,6 +39,8 @@ final class DocumentModel {
     var pendingParams: [String: Any] = [:]
     var showCommandPalette = false
     var showExport = false
+    /// Canvas-only layout: every panel, palette, toolbar and the status bar hidden; a floating button returns.
+    var isFullscreen = false
     var inspectorVisible: Bool { didSet { AppSettings.inspectorVisible = inspectorVisible } }
     var showPanelSheet = false
     var pencilOnly: Bool { didSet { AppSettings.pencilOnly = pencilOnly } }

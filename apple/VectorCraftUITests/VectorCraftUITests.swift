@@ -70,5 +70,22 @@ final class VectorCraftUITests: VectorCraftUITestCase {
             }
         }
         XCTAssertEqual(app.state, .runningForeground, "the app crashed after a menu command")
+
+        // Full-screen canvas: everything but the canvas hides; the floating button brings the layout back.
+        if tap("control.fullscreen") {
+            if !element("control.fullscreen.exit").waitForExistence(timeout: 5) { note("fullscreen: no exit button") }
+            for id in ["toolPalette", "toolStrip", "inspector", "undo"] where element(id).exists {
+                note("fullscreen: \(id) still visible")
+            }
+            if !element("canvas").exists { note("fullscreen: canvas missing") }
+            if tap("control.fullscreen.exit") {
+                if !element("undo").waitForExistence(timeout: 5) { note("fullscreen exit: the top bar did not come back") }
+            } else {
+                note("fullscreen: exit button not tappable")
+            }
+        } else {
+            note("control.fullscreen: not found")
+        }
+        XCTAssertEqual(app.state, .runningForeground, "the app crashed in full screen")
     }
 }

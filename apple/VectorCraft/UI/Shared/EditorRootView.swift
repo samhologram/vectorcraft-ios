@@ -22,15 +22,21 @@ struct EditorRootView: View {
         GeometryReader { geo in
             let pad = horizontalSizeClass == .regular && geo.size.width >= 700
             Group {
-                if pad {
+                if model.isFullscreen {
+                    FullscreenCanvas(model: model)
+                } else if pad {
                     PadEditorView(model: model)
                 } else {
                     PhoneEditorView(model: model)
                 }
             }
             .toolbar { EditorToolbar(model: model, pad: pad) }
+            .toolbar(model.isFullscreen ? .hidden : .automatic, for: .navigationBar)
             .onChange(of: pad, initial: true) { _, isPad in ui.narrow = !isPad }
         }
+        .statusBarHidden(model.isFullscreen)
+        .persistentSystemOverlays(model.isFullscreen ? .hidden : .automatic)
+        .animation(.default, value: model.isFullscreen)
         .environment(ui)
         .focusedSceneValue(\.documentModel, model)
         .background { ToolShortcutButtons(model: model) }
@@ -125,6 +131,7 @@ struct EditorToolbar: ToolbarContent {
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             UndoRedoButtons(model: model)
+            FullscreenButton(model: model)
             if pad {
                 PanelsMenu(model: model)
                 PaletteButton(model: model)
@@ -167,5 +174,43 @@ private struct ToolShortcutButtons: View {
             .allowsHitTesting(false)
             .accessibilityHidden(true)
         }
+    }
+}
+
+/// Canvas-only layout (View > Full Screen Canvas, ⌃⌘F): the canvas keeps its gestures and Pencil drawing; one small
+/// floating glass button in a corner, inside the safe area, or Esc returns to the standard layout.
+private struct FullscreenCanvas: View {
+    let model: DocumentModel
+
+    var body: some View {
+        CanvasView(model: model)
+            .ignoresSafeArea()
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    model.isFullscreen = false
+                } label: {
+                    Label("Exit Full Screen", systemImage: "arrow.down.right.and.arrow.up.left")
+                        .labelStyle(.iconOnly)
+                        .padding(10)
+                }
+                .buttonStyle(.glass)
+                .keyboardShortcut(.escape, modifiers: [])
+                .padding(12)
+                .accessibilityIdentifier("control.fullscreen.exit")
+            }
+    }
+}
+
+/// Top-bar button that enters the canvas-only layout (`control.fullscreen`).
+struct FullscreenButton: View {
+    let model: DocumentModel
+
+    var body: some View {
+        Button {
+            model.isFullscreen = true
+        } label: {
+            Label("Full Screen Canvas", systemImage: "arrow.up.left.and.arrow.down.right")
+        }
+        .accessibilityIdentifier("control.fullscreen")
     }
 }
