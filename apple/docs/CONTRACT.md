@@ -393,3 +393,12 @@ vector/native (`.vectorcraft`, SVG, PDF-as-vector, AI, EPS, DXF…).
 Current state (commit 6de1bdda, by grep): none of it — no PhotosPicker, no fileImporter, `file.place` not wired
 (it appears only in the generated File menu, where its path param has no picker), no paste or canvas drop of media.
 Document browser already opens SVG/PDF/AI/EPS/legacy files as new documents (§2).
+
+## 9. App folder and foreign formats (cookbook §0b, 2026-10-24)
+
+Documents live in iCloud Drive › VectorCraft (ubiquity container `iCloud.ca.hologram.vectorcraft`, `Documents/`),
+falling back to On My iPad › VectorCraft without iCloud; it is the launch browser's default location. Opening a foreign
+format (SVG, PDF, AI, EPS, `.drawcraft`, PNG/JPEG…) creates a native `.vectorcraft` copy there (saved on first edit,
+original untouched; reopening the same original reopens its copy, keyed by the original's bookmark/URL); Export/Share
+writes foreign formats. Current state: not implemented (foreign files open read-only through DocumentGroup's
+import path; no iCloud container or entitlement yet).
