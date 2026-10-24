@@ -85,19 +85,28 @@ final class VectorCraftDocument: ReferenceFileDocument, @unchecked Sendable {
         let reopened = copy.flatMap { try? DocumentHandle.open(path: $0.path) }
         let handle = try reopened ?? openImage(data: data, name: "Photo.heic")
         let document = VectorCraftDocument(handle: handle, key: key, baseName: "Photo", copy: reopened == nil ? nil : copy)
+        let preparedSnapshot = try handle.saveNative()
         try document.writeNativeCopy()
+        if let copy = VectorNativeCopyMap.existingCopy(for: key) {
+            VectorNativeCopyMap.remember(copy, for: VectorNativeCopyMap.preparedPhotoKey(data: preparedSnapshot))
+        }
         return document
     }
 
-    required init(configuration: ReadConfiguration) throws {
-        AppEnvironment.bootstrap()
+    required convenience init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
+        try self.init(sourceData: data, fileName: configuration.file.filename ?? configuration.file.preferredFilename ?? "Untitled", contentType: configuration.contentType)
+    }
+
+    /// The same byte-level path DocumentGroup uses when it reopens a prepared native document.
+    init(sourceData data: Data, fileName: String, contentType: UTType) throws {
+        AppEnvironment.bootstrap()
         // The engine reads from a path and picks the importer from the extension and the content.
-        var name = configuration.file.filename ?? configuration.file.preferredFilename ?? "Untitled"
+        var name = fileName
         if (name as NSString).pathExtension.isEmpty,
-           let ext = configuration.contentType.preferredFilenameExtension {
+           let ext = contentType.preferredFilenameExtension {
             name += "." + ext
         }
         name = (name as NSString).lastPathComponent
@@ -105,18 +114,21 @@ final class VectorCraftDocument: ReferenceFileDocument, @unchecked Sendable {
             .appendingPathComponent("Open", isDirectory: true)
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let native = configuration.contentType.conforms(to: .vectorcraftDocument)
+        let native = contentType.conforms(to: .vectorcraftDocument)
             || (name as NSString).pathExtension.lowercased() == "vectorcraft"
-        let key = native ? "" : VectorNativeCopyMap.key(name: name, data: data)
+        let preparedKey = native ? VectorNativeCopyMap.preparedPhotoKey(data: data) : ""
+        let key = native
+            ? (VectorNativeCopyMap.existingCopy(for: preparedKey) == nil ? "" : preparedKey)
+            : VectorNativeCopyMap.key(name: name, data: data)
         let copy = key.isEmpty ? nil : VectorNativeCopyMap.existingCopy(for: key)
         let reopened = copy.flatMap { try? DocumentHandle.open(path: $0.path) }
         handle = try reopened ?? Self.openImageOrDocument(data: data, name: name, directory: dir)
         isNew = false
         initError = nil
-        originalData = native ? Data() : data
+        originalData = key.isEmpty ? Data() : data
         originalKey = key
-        originalBaseName = (name as NSString).deletingPathExtension
-        preserveOriginal = !native
+        originalBaseName = native && !key.isEmpty ? "Photo" : (name as NSString).deletingPathExtension
+        preserveOriginal = !native || !key.isEmpty
         copyURL = reopened == nil ? nil : copy
     }
 

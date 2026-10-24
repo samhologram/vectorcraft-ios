@@ -426,5 +426,8 @@ On My iPad › VectorCraft. Opening a foreign format (SVG, PDF, AI, EPS, `.drawc
 `.vectorcraft` copy there. New from Photo writes that copy during preparation; foreign-file edits write it after a
 short debounce and on document autosave. The original bytes are handed back unchanged by `ReferenceFileDocument`; reopening the same
 original resolves its copy by file name and content hash, since `ReadConfiguration` supplies bytes but no source URL.
+For a document prepared from Photos, the photo source key also has an alias for the exact native bytes handed to
+`DocumentGroup`. Its later native read keeps edits pointed at the same app-owned copy even if the browser names the
+file differently; the browser's initial native snapshot remains unchanged by those copy writes.
 The system owns the launch browser's location and a new document's initial destination; its placement in that folder
 is not guaranteed by `NewDocumentButton`. iCloud availability also requires signing with the matching entitlement.

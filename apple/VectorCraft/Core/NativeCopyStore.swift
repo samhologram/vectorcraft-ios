@@ -44,6 +44,13 @@ enum VectorNativeCopyMap {
         return "\(name)|\(data.count)|\(hash)"
     }
 
+    /// The native bytes handed to DocumentGroup after New from Photo identify its later read,
+    /// regardless of the filename chosen in the document browser.
+    static func preparedPhotoKey(data: Data) -> String {
+        let hash = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        return "photo-native|\(data.count)|\(hash)"
+    }
+
     private static func load() -> [String: String] {
         guard let data = UserDefaults.standard.data(forKey: defaultsKey),
               let map = try? JSONDecoder().decode([String: String].self, from: data) else { return [:] }

@@ -179,7 +179,7 @@ struct DocumentModelTests {
         #expect(model.panelGroups.flatMap(\.tabs).filter { $0 == "layers" }.count == 1)
     }
 
-    @Test func photoPreparationCreatesAndReusesAnAppOwnedNativeCopy() async throws {
+    @Test func photoPreparationRetainsCopyAfterDocumentGroupNativeRead() async throws {
         let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 6)).image { context in
             UIColor.red.setFill()
             context.fill(CGRect(x: 0, y: 0, width: 8, height: 6))
@@ -187,21 +187,30 @@ struct DocumentModelTests {
         let data = try #require(image.pngData())
         let document = try VectorCraftDocument.fromPhoto(data)
         #expect(!document.model.isEmptyDocument, "The selected image must become artwork")
-        #expect(try !document.snapshot(contentType: .vectorcraftDocument).isEmpty)
+        let preparedNative = try document.snapshot(contentType: .vectorcraftDocument)
+        #expect(!preparedNative.isEmpty)
         let key = VectorNativeCopyMap.key(name: "Photo", data: data)
         let copy = try #require(VectorNativeCopyMap.existingCopy(for: key))
         let before = try Data(contentsOf: copy)
-        let layersBefore = document.model.layers.count
-        document.model.run("shape.rectangle", ["x": 1, "y": 1, "width": 3, "height": 2])
-        #expect(document.model.layers.count == layersBefore + 1)
+        #expect(VectorNativeCopyMap.existingCopy(for: VectorNativeCopyMap.preparedPhotoKey(data: preparedNative)) == copy)
+        // DocumentGroup writes the prepared native snapshot into its browser, then reads that
+        // file as a fresh document. The browser name may differ from the Photos asset name.
+        let readBack = try VectorCraftDocument(
+            sourceData: preparedNative, fileName: "Untitled.vectorcraft", contentType: .vectorcraftDocument)
+        let layersBefore = readBack.model.layers.count
+        readBack.model.run("shape.rectangle", ["x": 1, "y": 1, "width": 3, "height": 2])
+        #expect(readBack.model.layers.count == layersBefore + 1)
         var after = before
         for _ in 0..<30 where after == before {
             try await Task.sleep(for: .milliseconds(100))
             after = try Data(contentsOf: copy)
         }
-        #expect(after != before, "An edit must update the app-owned native copy without waiting for DocumentGroup")
+        #expect(after != before, "An edit after DocumentGroup's native read must update the original app-owned copy")
+        #expect(preparedNative != after, "The browser's original prepared snapshot remains unchanged")
+        let latestSnapshot = try readBack.snapshot(contentType: .vectorcraftDocument)
+        #expect(after == latestSnapshot)
         let reopened = try VectorCraftDocument.fromPhoto(data)
-        #expect(reopened.model.layers.count == document.model.layers.count, "The same photo must reuse its edited copy")
+        #expect(reopened.model.layers.count == readBack.model.layers.count, "The same photo must reuse its edited copy")
         #expect(VectorNativeCopyMap.existingCopy(for: key) == copy)
     }
 }
