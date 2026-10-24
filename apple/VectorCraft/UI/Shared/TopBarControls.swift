@@ -68,6 +68,22 @@ struct PanelsMenu: View {
     }
 }
 
+/// A direct sidebar control on both layouts; the panel menu remains the route for choosing a panel.
+struct PanelVisibilityButton: View {
+    let model: DocumentModel
+    let pad: Bool
+
+    var body: some View {
+        Button {
+            model.togglePanelVisibility()
+        } label: {
+            Label((pad ? model.inspectorVisible : model.phoneSheetPresented) ? "Hide Panels" : "Show Panels",
+                  systemImage: "sidebar.trailing")
+        }
+        .accessibilityIdentifier("toggleInspector")
+    }
+}
+
 struct PanelsMenuContent: View {
     let model: DocumentModel
 

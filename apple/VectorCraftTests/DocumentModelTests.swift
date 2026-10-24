@@ -130,8 +130,51 @@ struct DocumentModelTests {
         model.runUI("window.dock")
         #expect(model.phoneSheetPresented)
 
+        model.toggleFullscreen()
+        #expect(model.isFullscreen)
+        #expect(!model.phoneSheetPresented)
+        model.toggleFullscreen()
+        #expect(!model.isFullscreen)
+        #expect(model.phoneSheetPresented, "Full screen exit must restore the previously open phone sheet")
+
         model.setPanelLayout(narrow: false)
         #expect(!model.phoneSheetPresented)
         #expect(model.inspectorVisible == padDockWasVisible, "Resizing must retain the iPad dock setting")
+    }
+
+    @Test func sidebarTogglePreservesDockArrangementAndRevealsSelection() throws {
+        let previousGroups = AppSettings.panelGroups
+        let previousVisibility = AppSettings.inspectorVisible
+        defer {
+            AppSettings.panelGroups = previousGroups
+            AppSettings.inspectorVisible = previousVisibility
+        }
+        let model = try makeModel()
+        model.setPanelLayout(narrow: false)
+        model.showDockPanel("layers")
+        let groupID = try #require(model.panelGroups.first(where: { $0.tabs.contains("layers") })?.id)
+        model.toggleDockGroup(groupID)
+        let arranged = model.panelGroups
+        let beforeReveal = model.panelRevealRevision
+
+        model.togglePanelVisibility()
+        #expect(!model.inspectorVisible)
+        #expect(model.panelGroups == arranged)
+        model.togglePanelVisibility()
+        #expect(model.inspectorVisible)
+        #expect(model.panelGroups == arranged, "Hiding and restoring must preserve selected tabs and collapse")
+        #expect(model.panelRevealRevision > beforeReveal, "Restoring must reveal the selected tab")
+
+        model.toggleFullscreen()
+        #expect(model.isFullscreen)
+        #expect(model.inspectorVisible)
+        model.toggleFullscreen()
+        #expect(!model.isFullscreen)
+        #expect(model.inspectorVisible)
+
+        model.togglePanelVisibility()
+        model.showDockPanel("layers")
+        #expect(model.inspectorVisible, "Menu selection must reveal a hidden dock")
+        #expect(model.panelGroups.flatMap(\.tabs).filter { $0 == "layers" }.count == 1)
     }
 }

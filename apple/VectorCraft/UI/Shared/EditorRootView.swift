@@ -135,11 +135,17 @@ struct EditorToolbar: ToolbarContent {
             UndoRedoButtons(model: model)
             FullscreenButton(model: model)
             if pad {
+                PanelVisibilityButton(model: model, pad: true)
                 PanelsMenu(model: model)
                 PaletteButton(model: model)
                 ExportButton(model: model)
             }
             OverflowMenu(model: model, includesActions: !pad)
+        }
+        if !pad {
+            ToolbarItem(placement: .topBarLeading) {
+                PanelVisibilityButton(model: model, pad: false)
+            }
         }
     }
 }
@@ -189,7 +195,7 @@ private struct FullscreenCanvas: View {
             .ignoresSafeArea()
             .overlay(alignment: .topTrailing) {
                 Button {
-                    model.isFullscreen = false
+                    model.toggleFullscreen()
                 } label: {
                     Label("Exit Full Screen", systemImage: "arrow.down.right.and.arrow.up.left")
                         .labelStyle(.iconOnly)
@@ -209,7 +215,7 @@ struct FullscreenButton: View {
 
     var body: some View {
         Button {
-            model.isFullscreen = true
+            model.toggleFullscreen()
         } label: {
             Label("Full Screen Canvas", systemImage: "arrow.up.left.and.arrow.down.right")
         }

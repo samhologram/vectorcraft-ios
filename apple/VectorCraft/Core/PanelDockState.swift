@@ -16,6 +16,25 @@ struct PanelGroup: Codable, Identifiable, Equatable {
 }
 
 extension DocumentModel {
+    /// Toolbar and Window menu share one visibility route; closing never removes a tab or changes its layout.
+    func togglePanelVisibility() {
+        if narrowPanelLayout {
+            phoneSheetPresented.toggle()
+        } else {
+            inspectorVisible.toggle()
+            if inspectorVisible { revealCurrentDockPanel() }
+        }
+    }
+
+    private func revealCurrentDockPanel() {
+        let shown = lastShownPanel.flatMap { id in
+            panelGroups.contains(where: { $0.tabs.contains(id) }) ? id : nil
+        } ?? panelGroups.first?.selected
+        guard let shown else { return }
+        lastShownPanel = shown
+        panelRevealRevision += 1
+    }
+
     /// Selecting an existing tab still bumps this token, so scroll readers reveal it again.
     func showDockPanel(_ id: String) {
         guard CommandCatalog.shared.panels.contains(where: { $0.id == id }) else { return }

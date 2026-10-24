@@ -48,6 +48,7 @@ final class DocumentModel {
     /// Phone sheets are transient; the persisted iPad dock must not open one during a compact layout transition.
     var phoneSheetPresented = false
     var narrowPanelLayout = false
+    @ObservationIgnored private var restorePhoneSheetAfterFullscreen = false
     var pencilOnly: Bool { didSet { AppSettings.pencilOnly = pencilOnly } }
     /// Bumps whenever the canvas must re-render the document.
     var renderTick = 0
@@ -91,6 +92,18 @@ final class DocumentModel {
     func setPanelLayout(narrow: Bool) {
         narrowPanelLayout = narrow
         if !narrow { phoneSheetPresented = false }
+    }
+
+    func toggleFullscreen() {
+        if isFullscreen {
+            isFullscreen = false
+            if narrowPanelLayout && restorePhoneSheetAfterFullscreen { phoneSheetPresented = true }
+            restorePhoneSheetAfterFullscreen = false
+        } else {
+            restorePhoneSheetAfterFullscreen = narrowPanelLayout && phoneSheetPresented
+            phoneSheetPresented = false
+            isFullscreen = true
+        }
     }
 
     // MARK: Refresh

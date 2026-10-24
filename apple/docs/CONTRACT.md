@@ -326,6 +326,11 @@ Spec:
   its resolved layout to `DocumentModel.narrowPanelLayout`. Explicit Window/panel/color-well show and toggle commands
   target the current layout; closing the phone sheet does not change the persisted iPad dock visibility. Switching
   to a wide layout dismisses a transient phone sheet and restores the iPad dock state.
+- **Toolbar sidebar toggle**: a `sidebar.trailing` button (`toggleInspector`) directly toggles panels on iPad and
+  compact iPhone. Hiding preserves panel groups, order, selected tabs and collapsed states. Showing a hidden iPad
+  dock reveals the selected group/tab without adding another panel. Selecting a panel from the menu also reveals a
+  hidden dock. Full screen temporarily hides the panel presentation and restores its prior visibility on exit;
+  `control.fullscreen.exit` remains the dedicated exit control.
 - **Panel-owned actions live in the panel header** (a trailing button row / "…" menu in `panelHeader.<id>`): Layers
   (new layer, new sublayer, delete, locate), Swatches (new swatch, delete), Artboards (new, delete), Symbols / Brushes /
   Graphic Styles (new from selection, delete), Appearance (add fill, add stroke, add effect). Never in the global

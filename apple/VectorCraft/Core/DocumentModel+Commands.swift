@@ -25,7 +25,7 @@ extension DocumentModel {
         case "window.panel.close":
             if narrowPanelLayout { phoneSheetPresented = false } else { inspectorVisible = false }
         case "window.dock", "window.panels":
-            if narrowPanelLayout { phoneSheetPresented.toggle() } else { inspectorVisible.toggle() }
+            togglePanelVisibility()
         case "tool.select":
             if let tool = params["tool"] as? String { selectTool(tool) } else { lastError = "tool.select needs a tool id." }
         case "view.zoomIn":

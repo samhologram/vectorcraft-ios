@@ -43,7 +43,7 @@ struct InspectorDock: View {
                         }
                         .padding(8)
                     }
-                    .onChange(of: model.panelRevealRevision) { _, _ in
+                    .onChange(of: model.panelRevealRevision, initial: true) { _, _ in
                         guard let shown = model.lastShownPanel,
                               let group = model.panelGroups.first(where: { $0.tabs.contains(shown) }) else { return }
                         withAnimation(.smooth) { reader.scrollTo(group.id, anchor: .top) }

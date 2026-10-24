@@ -242,7 +242,7 @@ struct EditorCommands: Commands {
     @CommandsBuilder private var viewCommands: some Commands {
         CommandGroup(after: .toolbar) {
             Button(model?.isFullscreen == true ? "Exit Full Screen Canvas" : "Full Screen Canvas") {
-                if let model { model.isFullscreen.toggle() }
+                model?.toggleFullscreen()
             }
             .keyboardShortcut("f", modifiers: [.control, .command])
             .disabled(model == nil)
