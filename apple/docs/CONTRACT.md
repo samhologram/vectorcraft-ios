@@ -340,3 +340,36 @@ Current state vs. spec (as of commit dd935321; to fix after the hold):
    Object/Type/Select/Effect are `CommandMenu`s, which iPadOS places after View, not in desktop order between Edit and
    View. Fix by checking iPadOS ordering of `CommandMenu` vs `CommandGroup(after: .textEditing)` placement, else note
    the platform limitation in a code comment.
+
+## 7. Productivity, Apple-clean (cookbook §0b, 2026-10-24)
+
+Spec — fast:
+- Every frequent action ≤ 1 tap from the canvas (tool pick, fill/stroke, undo/redo, delete, group, duplicate,
+  arrange, align, zoom-to-fit, the last command).
+- Hardware keyboard: every desktop shortcut with the same keys (tools V/A/P/T/M/L…, menu shortcuts from the catalog,
+  Space-drag pans, ⌘+/⌘−/⌘0 zoom), ⌘K opens the command palette.
+- Context menus on canvas objects (long-press / secondary click: cut/copy/paste/duplicate/delete/group/arrange/lock/
+  hide), on layer rows, artboard rows, swatches.
+- Drag & drop: layer reorder, images/SVG/PDF dropped onto the canvas (place), swatches onto objects, share out.
+- Gestures: two-finger tap undo, three-finger tap redo, pinch/pan; Pencil double-tap and squeeze (previous tool /
+  tool palette at the tip), Pencil hover shows the tool preview.
+- Scrubbable numeric fields (drag the label to change the value, one undo step), units shown.
+- Customizable toolbar (`toolbar(id:)` + `ToolbarItem(id:)`), remembered last tool, panel layout, tool options and
+  dialog values (`AppSettings`, reset by `-VectorCraftResetSettings`); multiple windows (one document per scene).
+Spec — clean: system components, SF Symbols, semantic colours, one primary action per area; everything else in menus,
+panel headers (§6) or the palette; no custom chrome.
+Feature pass deliverable: taps-to-do for the top 10 vector workflows (draw shape + set fill, pen path, edit anchors,
+type, align 3 objects, boolean unite, group + arrange, gradient fill, export PNG, new artboard).
+
+Current state vs. spec (commit 11f68b1c, by grep, not run):
+1. No ⌘K: the palette has a toolbar button but no keyboard shortcut.
+2. Context menus only on Layers and Artboards rows; none on canvas objects or swatches.
+3. Drag & drop only for layer reorder; no drop onto the canvas (place), no swatch drag.
+4. Toolbar not customizable (no `toolbar(id:)`).
+5. Remembered state: only `pencilOnly` and `inspectorVisible`; last tool, panel layout, tool options and dialog values
+   are not persisted.
+6. Scrub: `DragSlider` exists in 4 places; numeric fields (`NumberField`, transform X/Y/W/H, stroke weight) are not
+   scrubbable.
+7. Present: two/three-finger undo/redo taps, Pencil double-tap and squeeze (previous tool), hover → "move" events,
+   single-key tool shortcuts, desktop menu shortcuts via the generated menu bar, DocumentGroup multi-window.
+8. Not yet verified: Space-drag pan and ⌘+/⌘−/⌘0 zoom on a hardware keyboard; taps-to-do for the top 10 workflows.

@@ -71,3 +71,10 @@ type) so screenshots and UI tests start from real art.
 Every desktop panel opens from the inspector's panel menu and the Window menu; on iPad panels stack in the inspector
 and can be added, hidden, collapsed and reordered (arrangement persisted); on iPhone each panel is a sheet. Panel-owned
 actions (new layer, new swatch…) live in the panel's header. Spec and current gaps: `docs/CONTRACT.md` §6.
+
+## Productivity (cookbook §0b, 2026-10-24)
+
+Hyper-productive, Apple-clean: every frequent action ≤ 1 tap from the canvas, every desktop shortcut on a hardware
+keyboard (⌘K palette), context menus and drag & drop everywhere, Pencil double-tap/squeeze/hover, scrubbable fields,
+customizable toolbar, remembered tool/layout/values, multi-window; system components only, one primary action per
+area. Spec and current gaps: `docs/CONTRACT.md` §7.
