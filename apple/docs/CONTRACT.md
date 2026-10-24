@@ -385,6 +385,11 @@ Entry points: new-document flow, Layers panel header "Place", File ▸ Place…,
 Ids: `control.place.photos`, `control.place.files`, `command.file.place`. Needs `NSPhotoLibraryUsageDescription` only if
 full library access is requested (PhotosPicker needs none).
 
+Native decoders: photos and raster files (HEIC, JPEG, PNG, TIFF, RAW…) decode with ImageIO / Core Image (orientation and
+colour applied) and reach the engine as pixels through a new bridge call `place_image(rgba: Vec<u8>, width, height,
+name, artboard)` (to add); PDF pages for raster use go through PDFKit. Engine importers only for formats it owns as
+vector/native (`.vectorcraft`, SVG, PDF-as-vector, AI, EPS, DXF…).
+
 Current state (commit 6de1bdda, by grep): none of it — no PhotosPicker, no fileImporter, `file.place` not wired
 (it appears only in the generated File menu, where its path param has no picker), no paste or canvas drop of media.
 Document browser already opens SVG/PDF/AI/EPS/legacy files as new documents (§2).
