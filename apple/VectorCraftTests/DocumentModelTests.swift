@@ -107,4 +107,31 @@ struct DocumentModelTests {
         if wasReset { #expect(AppSettings.pencilOnly == false) }
         UserDefaults.standard.removeObject(forKey: AppSettings.Key.pencilOnly)
     }
+
+    @Test func phonePanelRequiresExplicitRequestAndPreservesPadDock() throws {
+        let previousGroups = AppSettings.panelGroups
+        defer { AppSettings.panelGroups = previousGroups }
+        let model = try makeModel()
+        let padDockWasVisible = model.inspectorVisible
+
+        model.setPanelLayout(narrow: true)
+        #expect(!model.phoneSheetPresented, "A compact launch must not present a sheet from iPad dock state")
+        model.showPanel(named: "layers")
+        #expect(model.phoneSheetPresented)
+        #expect(model.activePanel == .layers)
+        #expect(model.inspectorVisible == padDockWasVisible)
+
+        model.runUI("window.panel.close")
+        #expect(!model.phoneSheetPresented)
+        model.showPanel(named: "layers")
+        #expect(model.phoneSheetPresented, "Selecting the same panel must reopen its sheet")
+        model.runUI("window.dock")
+        #expect(!model.phoneSheetPresented)
+        model.runUI("window.dock")
+        #expect(model.phoneSheetPresented)
+
+        model.setPanelLayout(narrow: false)
+        #expect(!model.phoneSheetPresented)
+        #expect(model.inspectorVisible == padDockWasVisible, "Resizing must retain the iPad dock setting")
+    }
 }

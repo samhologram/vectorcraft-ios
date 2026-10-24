@@ -45,6 +45,9 @@ final class DocumentModel {
     /// Canvas-only layout: every panel, palette, toolbar and the status bar hidden; a floating button returns.
     var isFullscreen = false
     var inspectorVisible: Bool { didSet { AppSettings.inspectorVisible = inspectorVisible } }
+    /// Phone sheets are transient; the persisted iPad dock must not open one during a compact layout transition.
+    var phoneSheetPresented = false
+    var narrowPanelLayout = false
     var pencilOnly: Bool { didSet { AppSettings.pencilOnly = pencilOnly } }
     /// Bumps whenever the canvas must re-render the document.
     var renderTick = 0
@@ -83,6 +86,11 @@ final class DocumentModel {
     private static var initialInspectorVisible: Bool {
         guard UIDevice.current.userInterfaceIdiom == .pad else { return false }
         return AppSettings.isDemo ? true : AppSettings.inspectorVisible
+    }
+
+    func setPanelLayout(narrow: Bool) {
+        narrowPanelLayout = narrow
+        if !narrow { phoneSheetPresented = false }
     }
 
     // MARK: Refresh

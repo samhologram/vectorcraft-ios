@@ -146,6 +146,10 @@ parallel apps, `main` + `[skip ci]` pushes, upstream sync script, live simulator
 - Scene per §0b: `DocumentGroup` + `ReferenceFileDocument` (engine history on the scene `UndoManager`, autosave via
   `snapshot`) for document apps; a `WindowGroup` over the platform library for library apps (engine history still on
   the window's `UndoManager`; write-back on leaving the editor).
+- Reference-document creation, reading and snapshots must be safe outside MainActor. Store the thread-safe engine
+  handle directly and create the UI model lazily on MainActor; never assume document callbacks are main-thread.
+  Native autosave verification must cover scene UndoManager registration and edit → close → reopen of the same URL.
+  A manually written foreign-image copy or a demo WindowGroup does not establish native DocumentGroup persistence.
 - Per-idiom UI: iPad sidebar/palette + options + inspector; iPhone bottom tool strip + sheets with detents that keep
   the content visible above them. Liquid Glass system styles, no custom chrome.
 - Size the layout for the smallest window, not the device: iPadOS windows are resizable, in either orientation, Split
@@ -194,6 +198,10 @@ parallel apps, `main` + `[skip ci]` pushes, upstream sync script, live simulator
 
 ## 5. Toolchain (macOS)
 - Rust in `~/.cargo/bin` (often not on PATH). Xcode via `export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
+- On this host, Xcode/SwiftPM shared caches and CoreSimulator are outside the workspace sandbox. Use the tool's
+  normal escalated execution for authorized Xcode builds, simulator inspection and test runners from the outset;
+  a sandboxed CoreSimulator connection error is not evidence that the simulator service itself is broken.
+  Keep one current derived-data directory; do not duplicate caches just to avoid the normal access mechanism.
 - Simulator runtime: `xcodebuild -downloadPlatform iOS`; reject device-locked runtimes; `simctl create` devices.
 - Disk: check `df` first. One Rust target dir (≈ 5–11 GB); delete `target/debug` after host gates; one derived-data dir
   per agent (≈ 3 GB); delete `.xcresult` bundles once read.
@@ -231,6 +239,17 @@ parallel apps, `main` + `[skip ci]` pushes, upstream sync script, live simulator
 - **Read the notes and look at the screenshots — a green run can be hollow** (an empty demo library, a panel that
   never opened, an alert covering everything). Reset state the app persists between runs (UserDefaults, caches,
   the platform library) so runs don't depend on the previous one.
+- Ground fixtures in the real platform flow: explicit Photos authorization state, a writable Files directory
+  (NewDocumentButton uses the current browser location), and no covering browser/panel before canvas actions.
+  A background `canvas.exists` or a successful tap report is not proof that the editor/action is usable.
+- Enumerate tests with Xcode when case declarations/project configuration change; cache that inventory across
+  helper-only rebuilds. Verify actual nonzero executed counts. ObjC `AndReturnError` symbols are not test identifiers.
+  When debug dylibs are enabled, the tiny app launcher UUID can remain constant; verify the real `.debug.dylib`
+  plus test method inventory, not only the launcher. Do not use obsolete derived-data directories.
+- UX audits should parse one atomic accessibility hierarchy snapshot; do not walk every live indexed element
+  while a lazy list/animation changes, which can abort the story with stale-index exceptions. Action queries
+  should use stable identifiers or narrowly scoped native labels. Distinguish unavailable capabilities,
+  blocked setup, incomplete execution and actual product failures from passed workflows.
 - Coverage tours, one per user-facing catalog (tools, panels, menu/palette commands): visit every item through the real
   UI, act on it, screenshot it, fail only on a crash. Generate the list from the source of truth; keep the state valid
   between items (undo, reselect). Write a summary attachment with every item's outcome.

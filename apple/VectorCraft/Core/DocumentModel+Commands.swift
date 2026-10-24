@@ -23,9 +23,9 @@ extension DocumentModel {
             guard let name = params["panel"] as? String else { lastError = "window.panel needs a panel id."; return }
             showPanel(named: name)
         case "window.panel.close":
-            inspectorVisible = false
+            if narrowPanelLayout { phoneSheetPresented = false } else { inspectorVisible = false }
         case "window.dock", "window.panels":
-            inspectorVisible.toggle()
+            if narrowPanelLayout { phoneSheetPresented.toggle() } else { inspectorVisible.toggle() }
         case "tool.select":
             if let tool = params["tool"] as? String { selectTool(tool) } else { lastError = "tool.select needs a tool id." }
         case "view.zoomIn":

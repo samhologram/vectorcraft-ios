@@ -240,7 +240,9 @@ Bridge files: `ui-commands.txt` (every command id the Swift sources reference li
     var pendingParams: [String: Any]         // prefilled params for pendingCommand (from a tool's "dialog" request)
     var showCommandPalette: Bool
     var showExport: Bool
-    var inspectorVisible: Bool               // iPad inspector column
+    var inspectorVisible: Bool               // persisted iPad inspector column only
+    var phoneSheetPresented: Bool            // transient phone/narrow-window panel sheet; starts closed
+    var narrowPanelLayout: Bool              // resolved editor layout, set by EditorRootView
     var pencilOnly: Bool                     // "Only Draw with Apple Pencil" (AppSettings)
     var renderTick: Int                      // bumps whenever the canvas must re-render
     weak var undoManager: UndoManager?
@@ -319,6 +321,11 @@ Spec:
   A vertical scroll reader brings the revealed group into view; each horizontal tab strip scrolls its selected tab
   into view. The Add menu only opens/selects panels; closing is a separate control. Persist the groups and selection.
   Ids: `panel.<id>` (menu entries), `panelHeader.<id>` (collapse toggle), `panelClose.<id>`, `panelBody.<id>`.
+- **Presentation ownership**: the iPad dock uses persisted `inspectorVisible`; the iPhone/narrow-window sheet uses
+  transient `phoneSheetPresented` and starts closed, even if the iPad dock is persisted open. `EditorRootView` reports
+  its resolved layout to `DocumentModel.narrowPanelLayout`. Explicit Window/panel/color-well show and toggle commands
+  target the current layout; closing the phone sheet does not change the persisted iPad dock visibility. Switching
+  to a wide layout dismisses a transient phone sheet and restores the iPad dock state.
 - **Panel-owned actions live in the panel header** (a trailing button row / "…" menu in `panelHeader.<id>`): Layers
   (new layer, new sublayer, delete, locate), Swatches (new swatch, delete), Artboards (new, delete), Symbols / Brushes /
   Graphic Styles (new from selection, delete), Appearance (add fill, add stroke, add effect). Never in the global

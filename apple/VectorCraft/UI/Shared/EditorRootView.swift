@@ -32,7 +32,10 @@ struct EditorRootView: View {
             }
             .toolbar { EditorToolbar(model: model, pad: pad) }
             .toolbar(model.isFullscreen ? .hidden : .automatic, for: .navigationBar)
-            .onChange(of: pad, initial: true) { _, isPad in ui.narrow = !isPad }
+            .onChange(of: pad, initial: true) { _, isPad in
+                ui.narrow = !isPad
+                model.setPanelLayout(narrow: !isPad)
+            }
         }
         .statusBarHidden(model.isFullscreen)
         .persistentSystemOverlays(model.isFullscreen ? .hidden : .automatic)
@@ -109,8 +112,8 @@ struct EditorRootView: View {
 
     /// The panel sheet may be up; close it, wait for the dismissal, then present.
     private func presentAfterPanel(_ action: @escaping @MainActor () -> Void) {
-        if ui.narrow && model.inspectorVisible {
-            model.inspectorVisible = false
+        if ui.narrow && model.phoneSheetPresented {
+            model.phoneSheetPresented = false
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(450))
                 action()

@@ -19,10 +19,7 @@ struct PhoneEditorView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             ToolStrip(model: model)
         }
-        .sheet(isPresented: Binding(
-            get: { model.inspectorVisible },
-            set: { model.inspectorVisible = $0 }
-        )) {
+        .sheet(isPresented: $model.phoneSheetPresented) {
             PanelHost(model: model, showsSwitcher: true)
                 .presentationDetents([.fraction(Self.smallDetent), .medium, .large], selection: $detent)
                 .presentationBackgroundInteraction(.enabled)

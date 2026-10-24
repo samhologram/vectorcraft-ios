@@ -36,18 +36,61 @@ class VectorCraftUITestCase: XCTestCase {
     /// Fails (the test cannot continue) only when no document opens.
     func openNewDocument() {
         pause(2)
-        if element("canvas").waitForExistence(timeout: 3) == false {
+        if !hasForegroundCanvas {
+            chooseLocalDocumentLocationIfNeeded()
             if !tapCreateDocument() { note("start: no create-document control found in the browser") }
         }
         // A name prompt or template chooser may follow: accept the default.
-        for label in ["Create", "Done", "Save", "OK"] {
+        for label in ["Create", "Done", "Save"] {
             let b = app.alerts.buttons[label].firstMatch
             if b.waitForExistence(timeout: 1) { b.tap(); break }
         }
+        let alert = app.alerts.firstMatch
+        if alert.exists {
+            let message = ([alert.label] + alert.staticTexts.allElementsBoundByIndex.map(\.label)).joined(separator: " | ")
+            XCTFail("Document creation alert: \(message)")
+            return
+        }
         let opened = element("canvas").waitForExistence(timeout: 90)
         XCTAssertTrue(opened, "No document opened: the canvas never appeared (see \(prefix)-notes)")
+        // DocumentGroup can briefly expose an editor behind its system Recents browser. A canvas that merely
+        // exists in the accessibility tree is not an open, usable document. Dismiss the browser only when an
+        // editor has appeared behind it, then require a foreground canvas before any story uses the controls.
+        let browser = prefixQuery("DOC.browsingRoot").firstMatch
+        if browser.exists {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
+            pause(0.5)
+        }
+        let deadline = Date().addingTimeInterval(15)
+        while Date() < deadline {
+            if hasForegroundCanvas { break }
+            pause(0.5)
+        }
+        XCTAssertFalse(browser.exists, "The system document browser still covers the editor")
+        XCTAssertTrue(hasForegroundCanvas, "No foreground, reachable canvas opened")
         if !element("demoReady").waitForExistence(timeout: 60) { note("start: demoReady marker never appeared") }
         pause(1)
+    }
+
+    /// NewDocumentButton creates in the directory selected by DocumentGroup's browser. A fresh simulator often
+    /// starts in Recents, which is a collection rather than a writable directory. Choose local storage when the
+    /// system browser exposes it; keep the browser visible for diagnosis if that route is unavailable.
+    func chooseLocalDocumentLocationIfNeeded() {
+        let browser = prefixQuery("DOC.browsingRoot").firstMatch
+        guard browser.exists else { return }
+        let browse = app.buttons.matching(NSPredicate(format: "label == %@", "Browse"))
+        if let button = browse.allElementsBoundByIndex.first(where: canTap) {
+            button.tap()
+            pause(0.5)
+        }
+        let localLabel = isPad ? "On My iPad" : "On My iPhone"
+        let local = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", localLabel))
+        if let location = local.allElementsBoundByIndex.first(where: canTap) {
+            location.tap()
+            pause(0.5)
+        } else {
+            note("start: system browser has no reachable \(localLabel) location")
+        }
     }
 
     /// Taps whatever the system shows to create a document: the launch scene's "New Drawing", the browser's
@@ -57,7 +100,7 @@ class VectorCraftUITestCase: XCTestCase {
         let predicates = ["New Drawing", "Create Document", "Create", "New Document", "Add", "+"]
         let deadline = Date().addingTimeInterval(30)
         while Date() < deadline {
-            if element("canvas").exists { return true }
+            if hasForegroundCanvas { return true }
             for label in predicates {
                 let q = app.buttons.matching(NSPredicate(format: "label == %@ OR label BEGINSWITH %@", label, label))
                 for b in q.allElementsBoundByIndex where b.exists && b.isHittable {
@@ -77,6 +120,11 @@ class VectorCraftUITestCase: XCTestCase {
 
     func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    /// A document is ready only when its canvas is actionable and the system file browser has gone away.
+    var hasForegroundCanvas: Bool {
+        !prefixQuery("DOC.browsingRoot").firstMatch.exists && hit("canvas") != nil
     }
 
     /// On screen and tappable. The frame is checked first: `isHittable` fails the test for elements far off screen.

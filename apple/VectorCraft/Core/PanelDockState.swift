@@ -33,7 +33,7 @@ extension DocumentModel {
         }
         lastShownPanel = id
         panelRevealRevision += 1
-        inspectorVisible = true
+        if narrowPanelLayout { phoneSheetPresented = true } else { inspectorVisible = true }
         persistPanelGroups()
     }
 
