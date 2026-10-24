@@ -303,3 +303,40 @@ command: menus, context menus, the palette, context bar, sheets' Run button `com
 sections), `undo`, `redo`, `export`, `commandPalette`, `demoReady` (hidden marker present once demo seeding finished),
 `status` (status message), `errorAlert`.
 Widget ids must not look like command ids (a `control.`/`param.` prefix is fine).
+
+## 6. Panels, panel actions and the menu bar (cookbook §4 rules, 2026-10-24)
+
+Spec:
+- **Every desktop panel exists** (all `panel_catalog()` ids) and opens from both the inspector's panel menu
+  (right side) and the Window menu. A panel entry that opens nothing is a bug; the panel tour opens AND acts on every
+  panel.
+- **Arrangement like the desktop**: on iPad the inspector holds a *stack* of panels; each can be added (panel menu /
+  Window menu), hidden (closed), collapsed to its header, and reordered by dragging its header. The arrangement
+  (ordered ids + collapsed flags) persists in `AppSettings` and is reset by `-VectorCraftResetSettings`.
+  iPhone: one panel per sheet (detents), the panel menu picks which. Model surface (to add):
+  `var panelStack: [PanelSlot]` (`struct PanelSlot { id: String; collapsed: Bool }`), `showPanel(_ id:)` (adds or
+  expands + scrolls to it), `hidePanel(_ id:)`, `togglePanelCollapsed(_ id:)`, `movePanel(from:to:)`.
+  Ids: `panel.<id>` (menu entries), `panelHeader.<id>` (collapse toggle), `panelClose.<id>`, `panelBody.<id>`.
+- **Panel-owned actions live in the panel header** (a trailing button row / "…" menu in `panelHeader.<id>`): Layers
+  (new layer, new sublayer, delete, locate), Swatches (new swatch, delete), Artboards (new, delete), Symbols / Brushes /
+  Graphic Styles (new from selection, delete), Appearance (add fill, add stroke, add effect). Never in the global
+  toolbar or context bar.
+- **iPad menu bar = merge**: iPadOS system groups stay (app menu, File, Edit, View, Window, Help); the desktop menus and
+  items are inserted in desktop order (File items into File, Edit into Edit, then Object, Type, Select, Effect, View
+  items into View), Window and Help last.
+
+Current state vs. spec (as of commit dd935321; to fix after the hold):
+1. No panel stack: the inspector shows ONE panel (`DocumentModel.activePanel` + `activeGenericPanel`); no add/hide/
+   collapse/reorder, nothing persisted besides `inspectorVisible`.
+2. Panel actions sit in panel *bodies*, not headers: `LayersPanel.swift` (layer.new / layer.newSublayer / layer.delete),
+   `ColorPanels.swift` (swatch.new), `ArtboardsPanel.swift` (artboard.new), `LibraryPanels.swift` (symbol.new,
+   brush.new, graphicStyle.new). There is no shared panel header view yet.
+3. `UI/Pad/ContextBar.swift` carries selection actions owned by panels (Align, Pathfinder, Arrange): keep the tool
+   options there; move or duplicate the panel actions into their panels' headers (decide per HIG: context bar quick
+   actions may stay only as shortcuts, the panel must own them).
+4. 21 panels are hand-built; the other `panel_catalog()` ids open a generic "commands of this panel" page. Verify each
+   generic page has at least one working action (tour requirement); panels whose page is empty count as bugs.
+5. Menu bar (`App/EditorCommands.swift`): File/Edit/View/Window/Help items are merged into the system groups, but
+   Object/Type/Select/Effect are `CommandMenu`s, which iPadOS places after View, not in desktop order between Edit and
+   View. Fix by checking iPadOS ordering of `CommandMenu` vs `CommandGroup(after: .textEditing)` placement, else note
+   the platform limitation in a code comment.

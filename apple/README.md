@@ -65,3 +65,9 @@ type) so screenshots and UI tests start from real art.
 `VectorCraft/Resources/Assets.xcassets/AppIcon.appiconset` and `LaunchIcon.imageset` are upstream
 `assets/app-icon/vectorcraft.svg` rendered full-bleed (rounded clip removed), opaque, 1024 px (licence:
 `docs/APP-ICON-LICENSE.txt`, copied from `assets/app-icon/LICENSE.txt`).
+
+## Panels (cookbook §4, 2026-10-24)
+
+Every desktop panel opens from the inspector's panel menu and the Window menu; on iPad panels stack in the inspector
+and can be added, hidden, collapsed and reordered (arrangement persisted); on iPhone each panel is a sheet. Panel-owned
+actions (new layer, new swatch…) live in the panel's header. Spec and current gaps: `docs/CONTRACT.md` §6.
