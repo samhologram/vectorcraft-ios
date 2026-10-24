@@ -88,7 +88,7 @@ struct PanelsMenuContent: View {
 
     private func item(_ p: PanelInfo) -> some View {
         Button {
-            model.showPanel(named: p.id, toggle: true)
+            model.showPanel(named: p.id)
         } label: {
             Label(p.label, systemImage: CommandCatalog.shared.symbol(forPanel: p.id))
         }

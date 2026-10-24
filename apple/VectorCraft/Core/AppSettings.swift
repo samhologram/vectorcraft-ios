@@ -5,6 +5,7 @@ enum AppSettings {
     enum Key {
         static let pencilOnly = "pencilOnly"
         static let inspectorVisible = "inspectorVisible"
+        static let panelGroups = "panelGroups.v1"
     }
 
     static let demoArgument = "-VectorCraftDemo"
@@ -25,6 +26,7 @@ enum AppSettings {
         if shouldResetSettings {
             defaults.removeObject(forKey: Key.pencilOnly)
             defaults.removeObject(forKey: Key.inspectorVisible)
+            defaults.removeObject(forKey: Key.panelGroups)
         }
         defaults.register(defaults: [Key.pencilOnly: false, Key.inspectorVisible: true])
     }
@@ -38,5 +40,20 @@ enum AppSettings {
     static var inspectorVisible: Bool {
         get { UserDefaults.standard.object(forKey: Key.inspectorVisible) as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: Key.inspectorVisible) }
+    }
+
+    static var panelGroups: [PanelGroup] {
+        get {
+            guard let data = UserDefaults.standard.data(forKey: Key.panelGroups),
+                  let groups = try? JSONDecoder().decode([PanelGroup].self, from: data) else {
+                return [PanelGroup(tabs: ["properties", "color", "stroke"]),
+                        PanelGroup(tabs: ["layers", "artboards"])]
+            }
+            return groups
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else { return }
+            UserDefaults.standard.set(data, forKey: Key.panelGroups)
+        }
     }
 }

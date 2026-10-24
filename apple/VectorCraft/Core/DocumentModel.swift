@@ -28,6 +28,9 @@ final class DocumentModel {
     /// Set instead of `activePanel` when `window.panel` names a panel without a dedicated page (a
     /// `panel_catalog()` id such as "colorGuide"); nil when `activePanel` is the one to show.
     var activeGenericPanel: String?
+    var panelGroups: [PanelGroup]
+    var lastShownPanel: String?
+    var panelRevealRevision = 0
     var view = ViewTransform()
     /// Shown as an alert with the full message.
     var lastError: String?
@@ -42,7 +45,6 @@ final class DocumentModel {
     /// Canvas-only layout: every panel, palette, toolbar and the status bar hidden; a floating button returns.
     var isFullscreen = false
     var inspectorVisible: Bool { didSet { AppSettings.inspectorVisible = inspectorVisible } }
-    var showPanelSheet = false
     var pencilOnly: Bool { didSet { AppSettings.pencilOnly = pencilOnly } }
     /// Bumps whenever the canvas must re-render the document.
     var renderTick = 0
@@ -72,6 +74,7 @@ final class DocumentModel {
         selection = handle.selection()
         pencilOnly = AppSettings.pencilOnly
         inspectorVisible = Self.initialInspectorVisible
+        panelGroups = AppSettings.panelGroups
         refresh()
     }
 

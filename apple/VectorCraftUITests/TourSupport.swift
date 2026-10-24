@@ -127,6 +127,15 @@ extension VectorCraftUITestCase {
         if let e = hit(id) {
             e.tap()
             route = "switcher"
+        } else if usesToolPalette, let add = hit("control.panelMenu") {
+            add.tap()
+            pause(0.6)
+            if let item = hit(id) {
+                item.tap()
+                route = "dock-add"
+            } else {
+                closeMenus()
+            }
         } else if let more = hit("panel.more") {
             more.tap()
             pause(0.6)
@@ -163,18 +172,33 @@ extension VectorCraftUITestCase {
                 return nil
             }
         }
-        if !element("panelTitle").waitForExistence(timeout: 5) {
+        let openedID = usesToolPalette ? "panelBody.\(panel)" : "panelTitle"
+        if !element(openedID).waitForExistence(timeout: 5) {
             cause = "panel-did-not-open"
             return nil
         }
+        lastOpenedPanelID = panel
         pause(0.8)
         return route
     }
 
     /// Closes the panel sheet (iPhone) / inspector content; harmless when nothing is open.
     func closePanelIfOpen() {
+        if usesToolPalette, let panel = lastOpenedPanelID {
+            if let actions = hit("panelActions.\(panel)") {
+                actions.tap()
+                pause(0.4)
+                if let close = hit("panelClose.\(panel)") {
+                    close.tap()
+                    lastOpenedPanelID = nil
+                    pause(0.5)
+                } else { closeMenus() }
+            }
+            return
+        }
         guard element("panelTitle").exists, let close = hit("panel.close") else { return }
         close.tap()
+        lastOpenedPanelID = nil
         let deadline = Date().addingTimeInterval(4)
         while element("panelTitle").exists && Date() < deadline { pause(0.3) }
         pause(0.5)

@@ -241,7 +241,6 @@ Bridge files: `ui-commands.txt` (every command id the Swift sources reference li
     var showCommandPalette: Bool
     var showExport: Bool
     var inspectorVisible: Bool               // iPad inspector column
-    var showPanelSheet: Bool                 // iPhone / narrow window panel sheet
     var pencilOnly: Bool                     // "Only Draw with Apple Pencil" (AppSettings)
     var renderTick: Int                      // bumps whenever the canvas must re-render
     weak var undoManager: UndoManager?
@@ -314,8 +313,11 @@ Spec:
   Window menu), hidden (closed), collapsed to its header, and reordered by dragging its header. The arrangement
   (ordered ids + collapsed flags) persists in `AppSettings` and is reset by `-VectorCraftResetSettings`.
   iPhone: one panel per sheet (detents), the panel menu picks which. Model surface (to add):
-  `var panelStack: [PanelSlot]` (`struct PanelSlot { id: String; collapsed: Bool }`), `showPanel(_ id:)` (adds or
-  expands + scrolls to it), `hidePanel(_ id:)`, `togglePanelCollapsed(_ id:)`, `movePanel(from:to:)`.
+  `var panelGroups: [PanelGroup]` (`struct PanelGroup { id: UUID; tabs: [String]; selected: String;
+  collapsed: Bool }`), `showDockPanel(_ id:)` (adds to a group if needed, selects, expands, and increments a reveal
+  revision even when already selected), `hideDockPanel(_ id:)`, `toggleDockGroup(_ id:)`, `moveDockGroup(_ id:by:)`.
+  A vertical scroll reader brings the revealed group into view; each horizontal tab strip scrolls its selected tab
+  into view. The Add menu only opens/selects panels; closing is a separate control. Persist the groups and selection.
   Ids: `panel.<id>` (menu entries), `panelHeader.<id>` (collapse toggle), `panelClose.<id>`, `panelBody.<id>`.
 - **Panel-owned actions live in the panel header** (a trailing button row / "…" menu in `panelHeader.<id>`): Layers
   (new layer, new sublayer, delete, locate), Swatches (new swatch, delete), Artboards (new, delete), Symbols / Brushes /
@@ -323,12 +325,19 @@ Spec:
   toolbar or context bar.
 - **iPad menu bar = merge**: iPadOS system groups stay (app menu, File, Edit, View, Window, Help); the desktop menus and
   items are inserted in desktop order (File items into File, Edit into Edit, then Object, Type, Select, Effect, View
-  items into View), Window and Help last.
+  items into View), Window and Help last. Generated shortcuts must yield to system shortcuts. In particular,
+  Cmd-Option-Shift-V is reserved by Paste and Match Style; the desktop's Paste on All Artboards remains in the
+  menu and command palette without that shortcut on iPadOS. A duplicate shortcut raised a UIKit menu-builder
+  exception during launch on the iPadOS 27 simulator (2026-10-24 crash reports).
 
-Current state vs. spec (as of commit dd935321; to fix after the hold):
-1. No panel stack: the inspector shows ONE panel (`DocumentModel.activePanel` + `activeGenericPanel`); no add/hide/
-   collapse/reorder, nothing persisted besides `inspectorVisible`.
-2. Panel actions sit in panel *bodies*, not headers: `LayersPanel.swift` (layer.new / layer.newSublayer / layer.delete),
+Baseline gaps (as of commit dd935321; implementation in progress):
+1. The iPad dock implementation is in `PanelDockState.swift` and `InspectorDock.swift`: groups/tabs can be added,
+   selected, hidden, collapsed and reordered via menu controls, with settings persistence and selected-tab reveal.
+   Drag reorder remains open. It still needs an
+   iPad build and interaction test before this gap can be marked closed. `DocumentModel.activePanel` and
+   `activeGenericPanel` remain the iPhone sheet selection.
+2. Panel actions still sit in panel *bodies* as well as the new dock action menus; consolidate them after the dock
+   has passed its first interaction test: `LayersPanel.swift` (layer.new / layer.newSublayer / layer.delete),
    `ColorPanels.swift` (swatch.new), `ArtboardsPanel.swift` (artboard.new), `LibraryPanels.swift` (symbol.new,
    brush.new, graphicStyle.new). There is no shared panel header view yet.
 3. `UI/Pad/ContextBar.swift` carries selection actions owned by panels (Align, Pathfinder, Arrange): keep the tool

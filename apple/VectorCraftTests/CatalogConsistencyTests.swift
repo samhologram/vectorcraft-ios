@@ -38,6 +38,22 @@ struct CatalogConsistencyTests {
         }
     }
 
+    @Test func systemPasteShortcutDoesNotDuplicateGeneratedEditCommand() {
+        func contains(_ id: String, in nodes: [MenuNode]) -> Bool {
+            nodes.contains { node in
+                switch node.kind {
+                case .command(let command, _, _): command == id
+                case .submenu(_, let children): contains(id, in: children)
+                case .separator: false
+                }
+            }
+        }
+        let id = "edit.pasteOnAllArtboards"
+        #expect(CommandCatalog.shared.shortcut(id) != nil, "Desktop catalog should retain its shortcut")
+        #expect(contains(id, in: MenuLayout.nodes(for: "Edit")), "Keep the command reachable in Edit")
+        #expect(MenuLayout.shortcut(for: id) == nil, "UIKit reserves Cmd-Option-Shift-V for Paste and Match Style")
+    }
+
     @Test func paramFormsAreCachedAndParse() {
         let fields = CommandCatalog.shared.params("shape.rectangle")
         #expect(!fields.isEmpty)

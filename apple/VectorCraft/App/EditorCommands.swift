@@ -33,6 +33,8 @@ enum MenuLayout {
     private static let reserved: Set<String> = [
         "cmd+n", "cmd+o", "cmd+w", "cmd+q", "cmd+h", "cmd+m", "cmd+p", "cmd+s", "cmd+c", "cmd+x", "cmd+v", "cmd+a",
         "cmd+z", "cmd+shift+z", "cmd+,", "cmd+f", "cmd+k",
+        // UIKit supplies Paste and Match Style. Reusing it for Paste on All Artboards aborts the menu builder.
+        "cmd+alt+shift+v",
     ]
 
     private static var cache: [String: [MenuNode]] = [:]

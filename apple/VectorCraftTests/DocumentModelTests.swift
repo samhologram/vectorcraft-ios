@@ -29,8 +29,10 @@ struct DocumentModelTests {
 
     @Test func undoAndRedoRoundTripThroughTheManager() throws {
         let model = try makeModel()
-        model.undoManager = UndoManager()
+        let manager = UndoManager()
+        model.undoManager = manager
         model.run("shape.rectangle", rectangle)
+        #expect(manager.canUndo)
         let withShape = model.layers.count
         let historyWith = model.state.historyId
         model.undo()

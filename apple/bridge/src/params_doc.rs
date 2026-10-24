@@ -503,7 +503,11 @@ mod tests {
         assert_eq!(one("{name: string}").kind, "string");
         assert_eq!(one("{ids: [id]}").kind, "ids");
         assert_eq!(one("{mode?: \"a\"|\"b\" = \"a\"}").default_json.as_deref(), Some("\"a\""));
-        assert_eq!(one("{id: albumId | null}").kind, "integer");
+        let opaque = one("{id: albumId | null}");
+        // An upstream-specific ID is not a numeric index. Keep its type as raw JSON rather than
+        // presenting a number field that would corrupt a string identifier.
+        assert_eq!(opaque.kind, "json");
+        assert!(opaque.is_optional);
     }
 
     #[test]

@@ -44,7 +44,7 @@ final class PanelTourUITests: TourTestCase {
             return
         }
         var details = ["opened via \(route)"]
-        let title = element("panelTitle").label
+        let title = usesToolPalette ? element("panel.\(panel.id)").label : element("panelTitle").label
         if title.lowercased().replacingOccurrences(of: "&", with: "and") != panel.label.lowercased().replacingOccurrences(of: "&", with: "and") {
             details.append("title='\(title)' expected '\(panel.label)'")
         }

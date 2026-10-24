@@ -17,6 +17,11 @@ document.info
 document.node
 edit.clear
 edit.clearHistory
+edit.copy
+edit.cut
+edit.paste
+edit.redo
+edit.undo
 effect.list
 graphicStyle.apply
 graphicStyle.breakLink
@@ -63,6 +68,8 @@ paint.default
 paint.setFill
 paint.setStroke
 paint.swap
+select.all
+select.none
 select.set
 stroke.set
 swatch.addUsedColors

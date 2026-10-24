@@ -1,0 +1,403 @@
+# Desktop catalog coverage in the native iPad/iPhone app.
+
+[tool.selection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.directSelection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.groupSelection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.magicWand]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.lasso]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.pen]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.addAnchor]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.deleteAnchor]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.anchorPoint]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.curvature]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.type]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.areaType]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.typeOnPath]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.verticalType]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.verticalAreaType]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.verticalTypeOnPath]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.touchType]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.lineSegment]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.arc]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.spiral]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.rectangularGrid]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.polarGrid]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.rectangle]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.roundedRectangle]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.ellipse]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.polygon]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.star]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.flare]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.paintbrush]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.blobBrush]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.shaper]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.pencil]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.smooth]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.pathEraser]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.join]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.eraser]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.scissors]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.knife]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.mirrorCut]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.lineCut]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.rectCut]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.rotate]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.reflect]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.scale]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.shear]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.reshape]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.width]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.warp]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.twirl]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.pucker]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.bloat]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.scallop]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.crystallize]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.wrinkle]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.freeTransform]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.puppetWarp]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.shapeBuilder]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.livePaintBucket]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.livePaintSelection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.perspectiveGrid]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.perspectiveSelection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.mesh]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.gradient]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.eyedropper]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.measure]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.blend]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.objectsOnPath]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.dimension]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolSprayer]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolShifter]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolScruncher]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolSizer]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolSpinner]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolStainer]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolScreener]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.symbolStyler]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.columnGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.stackedColumnGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.barGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.stackedBarGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.lineGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.areaGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.scatterGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.pieGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.radarGraph]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.artboard]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.slice]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.sliceSelection]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.hand]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.rotateView]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.printTiling]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[tool.zoom]
+ios = "Catalog-driven tool palette and canvas bridge"
+
+[panel.actions]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.align]
+ios = "Native inspector panel"
+
+[panel.appearance]
+ios = "Native inspector panel"
+
+[panel.artboards]
+ios = "Native inspector panel"
+
+[panel.assetExport]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.attributes]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.blend]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.brushes]
+ios = "Native inspector panel"
+
+[panel.color]
+ios = "Native inspector panel"
+
+[panel.colorGuide]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.colorThemes]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.cssProperties]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.docInfo]
+ios = "Native inspector panel"
+
+[panel.flattenerPreview]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.gradient]
+ios = "Native inspector panel"
+
+[panel.graphicStyles]
+ios = "Native inspector panel"
+
+[panel.history]
+ios = "Native inspector panel"
+
+[panel.imageTrace]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.info]
+ios = "Native inspector panel"
+
+[panel.layers]
+ios = "Native inspector panel"
+
+[panel.libraries]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.links]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.magicWand]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.navigator]
+ios = "Native inspector panel"
+
+[panel.pathfinder]
+ios = "Native inspector panel"
+
+[panel.patternOptions]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.properties]
+ios = "Native inspector panel"
+
+[panel.separations]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.stroke]
+ios = "Native inspector panel"
+
+[panel.svgInteractivity]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.swatches]
+ios = "Native inspector panel"
+
+[panel.symbols]
+ios = "Native inspector panel"
+
+[panel.transform]
+ios = "Native inspector panel"
+
+[panel.transparency]
+ios = "Native inspector panel"
+
+[panel.character]
+ios = "Native inspector panel"
+
+[panel.charStyles]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.glyphs]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.openType]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.paragraph]
+ios = "Native inspector panel"
+
+[panel.paraStyles]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.tabs]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"
+
+[panel.variables]
+ios = "Catalog-driven generic inspector page; commands may be unavailable"

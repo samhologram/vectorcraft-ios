@@ -21,10 +21,9 @@ extension DocumentModel {
         switch id {
         case "window.panel", "window.panel.activate":
             guard let name = params["panel"] as? String else { lastError = "window.panel needs a panel id."; return }
-            showPanel(named: name, toggle: (params["toggle"] as? Bool) ?? false)
+            showPanel(named: name)
         case "window.panel.close":
             inspectorVisible = false
-            showPanelSheet = false
         case "window.dock", "window.panels":
             inspectorVisible.toggle()
         case "tool.select":
@@ -82,30 +81,14 @@ extension DocumentModel {
     // MARK: Panels
 
     /// `window.panel`: shows the named panel (id or label, any case).
-    func showPanel(named name: String, toggle: Bool = false) {
+    func showPanel(named name: String) {
         let catalog = CommandCatalog.shared
         let canonical = catalog.panels.first {
             $0.id.caseInsensitiveCompare(name) == .orderedSame || $0.label.caseInsensitiveCompare(name) == .orderedSame
         }?.id ?? name
-        let dedicated = Panel.from(panelID: canonical)
-        let sameAsNow = inspectorVisible && ((dedicated != nil && dedicated == activePanel && activeGenericPanel == nil)
-            || (dedicated == nil && activeGenericPanel == canonical))
-        if toggle && sameAsNow {
-            inspectorVisible = false
-            showPanelSheet = false
-            return
-        }
-        if let dedicated {
-            activePanel = dedicated
-            activeGenericPanel = nil
-        } else {
-            activeGenericPanel = canonical
-        }
-        inspectorVisible = true
-        if UIDevice.current.userInterfaceIdiom != .pad { showPanelSheet = true }
+        // A Window-menu invocation always reveals the requested panel. Closing it is a separate action.
+        showDockPanel(canonical)
     }
-
-    func showPanel(_ panel: Panel) { showPanel(named: panel.rawValue) }
 
     // MARK: Tools
 

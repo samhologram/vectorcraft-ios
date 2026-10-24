@@ -21,7 +21,7 @@ struct PhoneEditorView: View {
         }
         .sheet(isPresented: Binding(
             get: { model.inspectorVisible },
-            set: { model.inspectorVisible = $0; if !$0 { model.showPanelSheet = false } }
+            set: { model.inspectorVisible = $0 }
         )) {
             PanelHost(model: model, showsSwitcher: true)
                 .presentationDetents([.fraction(Self.smallDetent), .medium, .large], selection: $detent)

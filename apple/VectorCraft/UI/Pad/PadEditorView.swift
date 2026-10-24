@@ -16,7 +16,7 @@ struct PadEditorView: View {
             }
         }
         .inspector(isPresented: $model.inspectorVisible) {
-            PanelHost(model: model, showsSwitcher: true)
+            InspectorDock(model: model)
                 .inspectorColumnWidth(min: 280, ideal: 320, max: 420)
         }
     }

@@ -11,6 +11,7 @@ class VectorCraftUITestCase: XCTestCase {
     var app: XCUIApplication!
     var notes: [String] = []
     var prefix = ""
+    var lastOpenedPanelID: String?
     var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
 
     // MARK: Launch
@@ -120,8 +121,11 @@ class VectorCraftUITestCase: XCTestCase {
     func tap(_ identifier: String, timeout: TimeInterval = 5) -> Bool {
         let e = element(identifier)
         guard e.waitForExistence(timeout: timeout) else { note("\(identifier): not found"); return false }
-        guard canTap(e) else { note("\(identifier): exists but not hittable (off screen or covered)"); return false }
-        e.tap()
+        guard let visible = hit(identifier) else {
+            note("\(identifier): exists but no matching element is hittable (off screen or covered)")
+            return false
+        }
+        visible.tap()
         return true
     }
 

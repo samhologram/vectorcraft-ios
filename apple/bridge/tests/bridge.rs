@@ -83,7 +83,7 @@ fn command_changes_state_and_history() {
     assert!(s1.can_undo && s1.history_id != s0.history_id && s1.revision > s0.revision);
     assert!(s1.dirty);
     let rows = d.layers(100);
-    assert!(rows.iter().any(|r| r.kind == "Path"), "{:?}", rows.iter().map(|r| &r.kind).collect::<Vec<_>>());
+    assert!(rows.iter().any(|r| r.kind == "Rectangle"), "{:?}", rows.iter().map(|r| &r.kind).collect::<Vec<_>>());
     d.undo().unwrap();
     let s2 = d.state();
     assert!(s2.history_id != s1.history_id && s2.can_redo);
@@ -175,7 +175,7 @@ fn save_and_open_round_trip() {
     let path = dir.join("t.vectorcraft");
     std::fs::write(&path, &bytes).unwrap();
     let o = DocumentHandle::open(path.to_string_lossy().into()).unwrap();
-    assert!(o.layers(100).iter().any(|r| r.kind == "Path"));
+    assert!(o.layers(100).iter().any(|r| r.kind == "Rectangle"));
     assert_eq!(o.state().artboards.len(), 1);
     assert!(DocumentHandle::open("/no/such/file.vectorcraft".into()).is_err());
     let svg = o.export("svg".into(), "{}".into()).unwrap();

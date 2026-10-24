@@ -5,12 +5,13 @@ import VectorCraftKit
 /// "commands of this panel" page, so every desktop panel is reachable.
 struct ActivePanelView: View {
     let model: DocumentModel
+    var panelID: String?
 
     var body: some View {
-        if let generic = model.activeGenericPanel {
+        if let generic = panelID ?? model.activeGenericPanel, Panel.from(panelID: generic) == nil {
             GenericPanelPage(model: model, panelID: generic)
         } else {
-            switch model.activePanel {
+            switch panelID.flatMap(Panel.from(panelID:)) ?? model.activePanel {
             case .properties: PropertiesPanel(model: model)
             case .layers: LayersPanel(model: model)
             case .color: ColorPanel(model: model)

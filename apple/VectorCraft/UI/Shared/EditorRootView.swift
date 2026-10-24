@@ -111,7 +111,6 @@ struct EditorRootView: View {
     private func presentAfterPanel(_ action: @escaping @MainActor () -> Void) {
         if ui.narrow && model.inspectorVisible {
             model.inspectorVisible = false
-            model.showPanelSheet = false
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(450))
                 action()
