@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @preconcurrency import VectorCraftKit
 @testable import VectorCraft
 
@@ -176,5 +177,31 @@ struct DocumentModelTests {
         model.showDockPanel("layers")
         #expect(model.inspectorVisible, "Menu selection must reveal a hidden dock")
         #expect(model.panelGroups.flatMap(\.tabs).filter { $0 == "layers" }.count == 1)
+    }
+
+    @Test func photoPreparationCreatesAndReusesAnAppOwnedNativeCopy() async throws {
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 6)).image { context in
+            UIColor.red.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 8, height: 6))
+        }
+        let data = try #require(image.pngData())
+        let document = try VectorCraftDocument.fromPhoto(data)
+        #expect(!document.model.isEmptyDocument, "The selected image must become artwork")
+        #expect(try !document.snapshot(contentType: .vectorcraftDocument).isEmpty)
+        let key = VectorNativeCopyMap.key(name: "Photo", data: data)
+        let copy = try #require(VectorNativeCopyMap.existingCopy(for: key))
+        let before = try Data(contentsOf: copy)
+        let layersBefore = document.model.layers.count
+        document.model.run("shape.rectangle", ["x": 1, "y": 1, "width": 3, "height": 2])
+        #expect(document.model.layers.count == layersBefore + 1)
+        var after = before
+        for _ in 0..<30 where after == before {
+            try await Task.sleep(for: .milliseconds(100))
+            after = try Data(contentsOf: copy)
+        }
+        #expect(after != before, "An edit must update the app-owned native copy without waiting for DocumentGroup")
+        let reopened = try VectorCraftDocument.fromPhoto(data)
+        #expect(reopened.model.layers.count == document.model.layers.count, "The same photo must reuse its edited copy")
+        #expect(VectorNativeCopyMap.existingCopy(for: key) == copy)
     }
 }

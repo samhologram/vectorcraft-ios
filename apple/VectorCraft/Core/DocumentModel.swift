@@ -56,6 +56,8 @@ final class DocumentModel {
     /// the canvas observes it so a hover move does not re-render the artwork.
     var overlayTick = 0
     @ObservationIgnored weak var undoManager: UndoManager?
+    /// A foreign document schedules its app-owned native copy when engine state changes.
+    @ObservationIgnored var onDirty: (@MainActor () -> Void)?
 
     // MARK: Internals shared with the extensions
     /// True while a pointer drag, a pinch/pan or a slider drag is in flight: renders are lower resolution.
@@ -122,7 +124,10 @@ final class DocumentModel {
             if rows != layers { layers = rows }
         }
         if revisionChanged || toolChanged { refreshToolOptions() }
-        if revisionChanged { renderTick += 1 }
+        if revisionChanged {
+            renderTick += 1
+            onDirty?()
+        }
         overlayTick += 1
     }
 

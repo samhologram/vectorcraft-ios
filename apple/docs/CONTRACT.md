@@ -29,16 +29,19 @@ Upstream files (everything else) are never edited.
 - Exported UTType `ca.hologram.vectorcraft.document` (extension `vectorcraft`, conforms to `public.data`,
   `public.content`). Writable: only this.
 - Imported, readable: `ca.hologram.vectorcraft.legacy` (`drawcraft`), `public.svg-image`, `com.adobe.pdf`,
-  `com.adobe.illustrator.ai-image` (extension `ai`), `com.adobe.encapsulated-postscript` (`eps`). Opened through the
-  engine importers; saved back as `.vectorcraft`.
+  `com.adobe.illustrator.ai-image` (extension `ai`), `com.adobe.encapsulated-postscript` (`eps`), and raster images.
+  The bridge importer reads PNG/JPEG/GIF/WebP/TIFF/BMP; ImageIO converts other system image formats to PNG.
+  Foreign originals are returned byte-identically, while edits write an app-owned native copy.
 
 `VectorCraftDocument: ReferenceFileDocument` (Snapshot = `Data`):
 - `init()` (New): `DocumentHandle.newDocument(width: 1080, height: 1080, preset: "")` (an empty document with one
   artboard and one layer).
 - `init(configuration:)`: writes `configuration.file.regularFileContents` to `Caches/Open/<uuid>/<filename>` and
   calls `DocumentHandle.open(path:)` (the engine picks the importer from the extension/content).
-- `snapshot(contentType:)`: `handle.saveNative()` → `Data`. `fileWrapper(snapshot:configuration:)`:
-  `FileWrapper(regularFileWithContents:)`.
+- `snapshot(contentType:)`: `handle.saveNative()` → `Data`. Native files return that data from
+  `fileWrapper(snapshot:configuration:)`; foreign files write/reuse the app-owned native copy and hand the original
+  bytes back to DocumentGroup. A changed foreign document also schedules a native-copy write after one second of
+  quiet, independently of DocumentGroup's autosave timing.
 - Engine history is mirrored on the scene `UndoManager`: after every call whose `historyId` changed (execute, tool
   pointer Up, commit), register an undo action calling `handle.undo()` (redo symmetric) with the engine's label as
   the action name. Never register for queries.
@@ -411,15 +414,17 @@ colour applied) and reach the engine as pixels through a new bridge call `place_
 name, artboard)` (to add); PDF pages for raster use go through PDFKit. Engine importers only for formats it owns as
 vector/native (`.vectorcraft`, SVG, PDF-as-vector, AI, EPS, DXF…).
 
-Current state (commit 6de1bdda, by grep): none of it — no PhotosPicker, no fileImporter, `file.place` not wired
-(it appears only in the generated File menu, where its path param has no picker), no paste or canvas drop of media.
-Document browser already opens SVG/PDF/AI/EPS/legacy files as new documents (§2).
+New from Photo uses an asynchronous `NewDocumentButton` preparation closure and a SwiftUI-hosted system photo picker.
+Selection opens the actual image through the bridge and returns a prepared native document; cancellation throws
+`CancellationError` so no blank document is created. The browser also opens registered raster types. Placing media
+into an existing document, paste, and canvas drop remain open.
 
 ## 9. App folder and foreign formats (cookbook §0b, 2026-10-24)
 
-Documents live in iCloud Drive › VectorCraft (ubiquity container `iCloud.ca.hologram.vectorcraft`, `Documents/`),
-falling back to On My iPad › VectorCraft without iCloud; it is the launch browser's default location. Opening a foreign
-format (SVG, PDF, AI, EPS, `.drawcraft`, PNG/JPEG…) creates a native `.vectorcraft` copy there (saved on first edit,
-original untouched; reopening the same original reopens its copy, keyed by the original's bookmark/URL); Export/Share
-writes foreign formats. Current state: not implemented (foreign files open read-only through DocumentGroup's
-import path; no iCloud container or entitlement yet).
+The app-owned native-copy folder is iCloud Drive › VectorCraft when its ubiquity container is available, otherwise
+On My iPad › VectorCraft. Opening a foreign format (SVG, PDF, AI, EPS, `.drawcraft`, raster images) writes/reuses a
+`.vectorcraft` copy there. New from Photo writes that copy during preparation; foreign-file edits write it after a
+short debounce and on document autosave. The original bytes are handed back unchanged by `ReferenceFileDocument`; reopening the same
+original resolves its copy by file name and content hash, since `ReadConfiguration` supplies bytes but no source URL.
+The system owns the launch browser's location and a new document's initial destination; its placement in that folder
+is not guaranteed by `NewDocumentButton`. iCloud availability also requires signing with the matching entitlement.

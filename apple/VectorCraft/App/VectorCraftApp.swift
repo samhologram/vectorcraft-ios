@@ -4,6 +4,7 @@ import SwiftUI
 struct VectorCraftApp: App {
     init() {
         AppEnvironment.bootstrap()
+        VectorCloudContainer.prepare()
     }
 
     var body: some Scene {
@@ -18,6 +19,7 @@ struct VectorCraftApp: App {
 
         DocumentGroupLaunchScene("VectorCraft") {
             NewDocumentButton("New Drawing")
+            NewFromPhotoButton()
         } background: {
             Color(.systemBackground)
         } overlayAccessoryView: { geometry in

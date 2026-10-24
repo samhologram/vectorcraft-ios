@@ -3,6 +3,38 @@ import XCTest
 /// Verifies the iPad inspector's reveal behavior, including showing an already selected tab.
 @MainActor
 final class PanelDockUITests: VectorCraftUITestCase {
+    func testToolbarSidebarRestoresSelectedPanel() {
+
+        continueAfterFailure = false
+        defer {
+            let evidence = XCTAttachment(string: app.debugDescription)
+            evidence.name = "sidebar-toggle-hierarchy"; evidence.lifetime = .keepAlways; add(evidence)
+        }
+        func waitState(_ message: String, _ check: @escaping () -> Bool) {
+            let predicate = NSPredicate { _, _ in check() }
+            XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: predicate, evaluatedWith: nil)], timeout: 8), .completed, message)
+        }
+
+        launchDemo(dark: false)
+        openNewDocument()
+        XCTAssertTrue(element("canvas").waitForExistence(timeout: 10), "Fixture: drawing must open")
+        var cause = ""
+        XCTAssertNotNil(openPanel("layers", cause: &cause), "Fixture: Layers must open: \(cause)")
+        func shown() -> Bool {
+            if isPad { return element("panelBody.layers").isHittable && hit("panel.layers") != nil }
+            return element("panelTitle").exists && element("panelTitle").label == "Layers" && hit("panel.close") != nil
+        }
+        waitState("Layers must be foreground and reachable", shown)
+        XCTAssertTrue(tap("toggleInspector"), "Toolbar must hide panels")
+        waitState("Panels must disappear", { !self.element("inspector").isHittable })
+        XCTAssertTrue(tap("toggleInspector"), "Toolbar must restore panels")
+        waitState("Restored presentation must preserve Layers", shown)
+        XCTAssertTrue(tap("toggleInspector"))
+        waitState("Panels must hide before explicit menu reopen", { !self.element("inspector").isHittable })
+        XCTAssertNotNil(openPanel("layers", cause: &cause), "Opening hidden Layers must reveal it: \(cause)")
+        waitState("Explicit reopen must reveal Layers", shown)
+    }
+
     func testShowCollapseReopenAndHide() throws {
         try XCTSkipUnless(isPad, "The stacked inspector is an iPad layout")
         launchDemo(dark: false)

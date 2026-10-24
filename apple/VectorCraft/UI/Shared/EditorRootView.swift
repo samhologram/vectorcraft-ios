@@ -135,17 +135,12 @@ struct EditorToolbar: ToolbarContent {
             UndoRedoButtons(model: model)
             FullscreenButton(model: model)
             if pad {
-                PanelVisibilityButton(model: model, pad: true)
                 PanelsMenu(model: model)
                 PaletteButton(model: model)
                 ExportButton(model: model)
             }
             OverflowMenu(model: model, includesActions: !pad)
-        }
-        if !pad {
-            ToolbarItem(placement: .topBarLeading) {
-                PanelVisibilityButton(model: model, pad: false)
-            }
+            PanelVisibilityButton(model: model, pad: pad)
         }
     }
 }
