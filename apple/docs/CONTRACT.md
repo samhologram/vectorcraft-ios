@@ -373,3 +373,18 @@ Current state vs. spec (commit 11f68b1c, by grep, not run):
 7. Present: two/three-finger undo/redo taps, Pencil double-tap and squeeze (previous tool), hover → "move" events,
    single-key tool shortcuts, desktop menu shortcuts via the generated menu bar, DocumentGroup multi-window.
 8. Not yet verified: Space-drag pan and ⌘+/⌘−/⌘0 zoom on a hardware keyboard; taps-to-do for the top 10 workflows.
+
+## 8. Start from / import device media (cookbook §0b, 2026-10-24)
+
+Spec: a new document can start from an image, SVG or PDF (document browser import + a "New from Photo/File" entry
+in the new-document flow: the engine opens SVG/PDF directly; an image becomes a document sized to it with the image
+placed via `file.place`). Into the current document (active artboard, selected/current layer), place from the camera
+roll (`PhotosPicker`, image data written to a temp file → `file.place {path}`), Files/iCloud (`fileImporter`, security-
+scoped URL copied to a temp file), drag & drop onto the canvas, and paste (images/SVG/PDF from the pasteboard).
+Entry points: new-document flow, Layers panel header "Place", File ▸ Place…, ⌘K palette, canvas context menu.
+Ids: `control.place.photos`, `control.place.files`, `command.file.place`. Needs `NSPhotoLibraryUsageDescription` only if
+full library access is requested (PhotosPicker needs none).
+
+Current state (commit 6de1bdda, by grep): none of it — no PhotosPicker, no fileImporter, `file.place` not wired
+(it appears only in the generated File menu, where its path param has no picker), no paste or canvas drop of media.
+Document browser already opens SVG/PDF/AI/EPS/legacy files as new documents (§2).

@@ -78,3 +78,8 @@ Hyper-productive, Apple-clean: every frequent action ≤ 1 tap from the canvas, 
 keyboard (⌘K palette), context menus and drag & drop everywhere, Pencil double-tap/squeeze/hover, scrubbable fields,
 customizable toolbar, remembered tool/layout/values, multi-window; system components only, one primary action per
 area. Spec and current gaps: `docs/CONTRACT.md` §7.
+
+## Device media (cookbook §0b, 2026-10-24)
+
+Start a document from, or place into the current one, images/SVG/PDF from Photos, Files/iCloud, drag & drop and paste.
+Spec and gaps: `docs/CONTRACT.md` §8.
