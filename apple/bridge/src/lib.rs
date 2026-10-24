@@ -536,6 +536,11 @@ impl DocumentHandle {
     }
 
     pub fn select_tool(&self, id: String, view: ViewParams) -> Result<(), BridgeError> {
+        // The desktop engine falls back to Selection for an unknown ID. The native bridge is
+        // catalog-driven, so reject that request before it changes the active tool.
+        if vectorcraft_tools::tool_info(&id).is_none() {
+            return Err(fail(format!("unknown tool `{id}`")));
+        }
         self.guarded(|i| {
             let v = i.view(&view);
             let r = i.session.select_tool(&id, v);

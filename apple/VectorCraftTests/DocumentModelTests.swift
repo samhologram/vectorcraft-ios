@@ -209,6 +209,10 @@ struct DocumentModelTests {
         #expect(preparedNative != after, "The browser's original prepared snapshot remains unchanged")
         let latestSnapshot = try readBack.snapshot(contentType: .vectorcraftDocument)
         #expect(after == latestSnapshot)
+        let browserSource = FileWrapper(regularFileWithContents: preparedNative)
+        let returnedSource = try readBack.fileWrapper(snapshot: latestSnapshot, existingFile: browserSource)
+        #expect(returnedSource.regularFileContents == preparedNative,
+                "Autosave must leave the browser's initial native source bytes unchanged")
         let reopened = try VectorCraftDocument.fromPhoto(data)
         #expect(reopened.model.layers.count == readBack.model.layers.count, "The same photo must reuse its edited copy")
         #expect(VectorNativeCopyMap.existingCopy(for: key) == copy)

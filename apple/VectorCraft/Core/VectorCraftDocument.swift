@@ -137,10 +137,15 @@ final class VectorCraftDocument: ReferenceFileDocument, @unchecked Sendable {
     }
 
     func fileWrapper(snapshot: Data, configuration: WriteConfiguration) throws -> FileWrapper {
+        try fileWrapper(snapshot: snapshot, existingFile: configuration.existingFile)
+    }
+
+    /// Shared by DocumentGroup's writer and the native read/write round-trip regression.
+    func fileWrapper(snapshot: Data, existingFile: FileWrapper?) throws -> FileWrapper {
         guard !originalKey.isEmpty else { return FileWrapper(regularFileWithContents: snapshot) }
         let latest = try writeNativeCopy()
         return preserveOriginal
-            ? (configuration.existingFile ?? FileWrapper(regularFileWithContents: originalData))
+            ? (existingFile ?? FileWrapper(regularFileWithContents: originalData))
             : FileWrapper(regularFileWithContents: latest)
     }
 

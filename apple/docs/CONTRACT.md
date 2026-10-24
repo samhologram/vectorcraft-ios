@@ -200,7 +200,7 @@ fn runs engine code under `catch_unwind`; never panics; poisoned locks recovered
     pub fn layers(&self, max_rows: u32) -> Vec<LayerRow>;          // capped (a huge document lists the first max_rows)
     pub fn inspect(&self, params_json: String) -> Result<String, BridgeError>;  // document.inspect passthrough
     // tools
-    pub fn select_tool(&self, id: String, view: ViewParams) -> Result<(), BridgeError>;
+    pub fn select_tool(&self, id: String, view: ViewParams) -> Result<(), BridgeError>; // rejects IDs absent from tool_catalog without changing the active tool
     pub fn pointer(&self, kind: String, x: f64, y: f64, mods: Modifiers, pressure: f32, view: ViewParams) -> Result<Vec<UiRequestInfo>, BridgeError>;
         // kind: "down","drag","up","move","doubleClick"; x,y in document coords
     pub fn tool_key(&self, key: String, mods: Modifiers, view: ViewParams) -> Result<Vec<UiRequestInfo>, BridgeError>;

@@ -44,6 +44,15 @@ fn catalogs_load() {
 }
 
 #[test]
+fn unknown_tool_is_rejected_without_changing_selection() {
+    let d = doc();
+    d.select_tool("rectangle".into(), view()).unwrap();
+    let error = d.select_tool("no.such.tool".into(), view()).unwrap_err();
+    assert!(error.to_string().contains("unknown tool `no.such.tool`"));
+    assert_eq!(d.state().tool, "rectangle");
+}
+
+#[test]
 fn menus_parse() {
     let titles: Vec<String> = desktop_menu_layout().into_iter().map(|s| s.title).collect();
     assert_eq!(titles, ["File", "Edit", "Object", "Type", "Select", "Effect", "View", "Window", "Help"]);

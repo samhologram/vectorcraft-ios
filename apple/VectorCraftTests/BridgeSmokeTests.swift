@@ -179,7 +179,9 @@ struct BridgeToolTests {
 
     @Test func selectingAnUnknownToolFailsCleanly() throws {
         let handle = try BridgeFixtures.newDocument()
+        try handle.selectTool(id: "rectangle", view: BridgeFixtures.view())
         #expect(throws: (any Error).self) { try handle.selectTool(id: "no.such.tool", view: BridgeFixtures.view()) }
+        #expect(handle.state().tool == "rectangle", "Invalid tool selection must not change the active tool")
     }
 }
 
