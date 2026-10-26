@@ -84,6 +84,24 @@ final class CanvasOverlayView: UIView {
                 ctx.move(to: a)
                 ctx.addLine(to: b)
                 ctx.strokePath()
+            case "distance":
+                guard let a = point(item.points, 0), let b = point(item.points, 2), !item.text.isEmpty else { continue }
+                let dx = b.x - a.x
+                let dy = b.y - a.y
+                let length = hypot(dx, dy)
+                guard length > 0 else { continue }
+                let nx = -dy / length * 4
+                let ny = dx / length * 4
+                ctx.setLineWidth(1)
+                ctx.move(to: a)
+                ctx.addLine(to: b)
+                for end in [a, b] {
+                    ctx.move(to: CGPoint(x: end.x - nx, y: end.y - ny))
+                    ctx.addLine(to: CGPoint(x: end.x + nx, y: end.y + ny))
+                }
+                ctx.strokePath()
+                drawPill(item.text, at: CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2),
+                         background: stroke, ctx: ctx)
             case "gridLine":
                 guard let a = point(item.points, 0), let b = point(item.points, 2) else { continue }
                 ctx.setLineWidth(1)

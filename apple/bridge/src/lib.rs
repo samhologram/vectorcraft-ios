@@ -712,6 +712,10 @@ fn flatten_overlays(ov: &[Overlay], zoom: f64) -> Vec<OverlayItem> {
             Overlay::Handle { p, color } => item("handle", vec![p.x, p.y], rgb(*color)),
             Overlay::Label { p, text, color } => OverlayItem { text: text.clone(), ..item("label", vec![p.x, p.y], rgb(*color)) },
             Overlay::Measure { p, text } => OverlayItem { text: text.clone(), ..item("measure", vec![p.x, p.y], [90, 90, 90, 255]) },
+            Overlay::Distance { a, b, text, color } => OverlayItem {
+                text: text.clone(),
+                ..item("distance", vec![a.x, a.y, b.x, b.y], rgb(*color))
+            },
             Overlay::Highlight { quad, color } => {
                 OverlayItem { filled: true, ..item("highlight", quad.iter().flat_map(|q| [q.x, q.y]).collect(), *color) }
             }
