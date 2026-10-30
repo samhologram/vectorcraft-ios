@@ -345,6 +345,16 @@ fn show_panel(app: &mut VectorcraftApp, params: &Value) -> Result<Value, String>
     })
 }
 
+/// Show `panel` as `window.panel` does, but leave it be when it already shows ([`showing`]): a
+/// command that opens a panel to work in (Edit › Color Settings…) never puts it away.
+pub(crate) fn reveal_panel(app: &mut VectorcraftApp, panel: &str) -> Result<Value, String> {
+    if showing(&app.ui, panel) {
+        app.ui.dock = true;
+        return Ok(json!({"open": panel}));
+    }
+    show_panel(app, &json!({ "panel": panel }))
+}
+
 /// `window.collapseDock {collapsed?}`: collapse every dock column to icons, or expand the outer
 /// one; without `collapsed` it toggles the outer column.
 pub(crate) fn collapse_dock(app: &mut VectorcraftApp, collapsed: Option<bool>) -> Result<Value, String> {
@@ -1265,9 +1275,7 @@ impl craft_ui::docking::DockContent<String> for PanelContent<'_> {
 }
 
 #[cfg(test)]
-#[path = "panel_docking_tests.rs"]
 mod tests;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
-#[path = "panel_docking_native_tests.rs"]
 mod native_tests;
